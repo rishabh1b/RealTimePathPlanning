@@ -3,6 +3,8 @@
 #include"nodeStruct.h"
 #include"obstacle.h"
 #include<list>
+#include"SMP.h"
+#include"RRTstar.h"
 //--------------------------------------------------------------class
 class Enviroment
 {
@@ -24,30 +26,84 @@ public:
 	bool grid = false;
 private:
 	//--------------------------------------------------------------Variables
+	std::list<Nodes*> safeNeighbours;
 protected:
 	//--------------------------------------------------------------Variables
 	std::list<Nodes> nodes;
 	std::list<obstacles> obst;
+	RRTstar rrtstar;
 	// A list or an array of Obstacles should come here
 
 };
 
 inline void Enviroment::setup()
 {
+
 	for (unsigned int i = 0; i < numberOfobst; i++)
 	{
 		obstacles ob;
 		obst.push_back(ob);
 	}
+
+	Nodes start(startx, starty, 0);
+	this->nodes.push_back(start);
+
 }
 
 inline void Enviroment::update()
 {
-	std::list<obstacles>::iterator it = obst.begin();
-	while (it != obst.end()) {
-		it->move();
+
+	std::list<obstacles>::iterator itobs = obst.begin();
+	while (itobs != obst.end()) {
+		itobs->move();
+		itobs++;
+	}
+	Nodes u;
+	do
+	{
+		u = SMP::sampler();
+
+	} while (! SMP::checkSample(u,obst));
+	Nodes* v = SMP::nearestNode(u, (this->nodes));
+	double dist = u.location.squareDistance((*v).location);
+	if (dist > epsilon)
+	{
+		float x_n = v->location.x + (u.location.x - v->location.x)  * epsilon / dist;
+		float y_n = v->location.y + (u.location.y - v->location.y)  * epsilon / dist;
+		u.location.x = x_n;
+		u.location.y = y_n;
+	}
+	std::list<Nodes*> closestNeighbours = rrtstar.findClosestNeighbours(u, rrtstarradius, (this->nodes));
+
+	if (closestNeighbours.empty())
+		return;
+
+	std::list<Nodes*>::iterator it = closestNeighbours.begin();
+	while (it != closestNeighbours.end()) // What if there is only one element?
+	{
+		if (SMP::checkCollision(u, *(*it),obst))
+			this->safeNeighbours.push_back(*it);
 		it++;
 	}
+	if (safeNeighbours.empty())
+		return;
+
+	Nodes* parent = SMP::nearestNode(u, safeNeighbours);
+	if (parent != NULL)
+	{
+		u.parent = parent;
+		u.costToStart = parent->costToStart + parent->location.distance(u.location);
+	}
+	it = safeNeighbours.begin();
+	while (it != safeNeighbours.end())
+	{
+		if ((*it)->costToStart > u.costToStart + u.location.distance((*it)->location))
+		{
+			(*it)->parent = &u;
+			(*it)->costToStart = u.costToStart + u.location.distance((*it)->location);
+		}
+	}
+
 }
 
 inline void Enviroment::render()
