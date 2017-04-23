@@ -14,7 +14,7 @@ void ofApp::setup(){
 	ofBackground(255, 255, 255);
 	
 	map.setup();
-
+	car.setup();
 #ifdef randomSeed
 	std::cout << "RandomSeed:" << randomSeed << endl;
 #endif
@@ -33,6 +33,10 @@ void ofApp::update(){
 #endif // DEBUG
 
 	map.update();
+	ofVec2f target;
+	target.set(mouseX, mouseY);
+	car.controller(target);
+	car.update();
 
 #ifdef CLK
 	auto end = std::chrono::steady_clock::now();
@@ -47,6 +51,7 @@ void ofApp::draw(){
 #endif // DEBUG
 
 	map.render();
+	car.render();
 
 #ifdef CLK
 	auto end = std::chrono::steady_clock::now();
