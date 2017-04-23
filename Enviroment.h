@@ -1,6 +1,7 @@
 #pragma once
 #include"simulationParam.h"
 #include"nodeStruct.h"
+#include<list>
 //--------------------------------------------------------------class
 class Enviroment
 {
@@ -22,6 +23,11 @@ public:
 	bool grid = false;
 private:
 	//--------------------------------------------------------------Variables
+protected:
+	//--------------------------------------------------------------Variables
+	std::list<Nodes> nodes;
+	// A list or an array of Obstacles should come here
+
 };
 
 inline void Enviroment::setup()
