@@ -12,24 +12,27 @@ void SMP::addNode(Nodes n)
 
 Nodes* SMP::nearestNode(Nodes n)
 {
-	double min_dist = n.location.squareDistance(nodes.front().location);
-	Nodes* near_node = &(nodes.front());
-	std::list<Nodes>::iterator it = nodes.begin();
-	while (it != nodes.end())
-	{
-		it++;
-		if (n.location.squareDistance((*it).location) < min_dist)
-		{
-			min_dist = n.location.squareDistance((*it).location);
-			near_node = &(*it);
+	if (!nodes.empty()) {
+		Nodes* nearNode = & nodes.front();
+		float minDist = n.location.distanceSquared(nearNode->location);
+		for (auto index : nodes) {
+			float dist = n.location.squareDistance(index.location);
+			if (dist < minDist) {
+				minDist = dist;
+				nearNode = &index;
+			}
 		}
+		return nearNode;
 	}
-	return near_node;
+	else
+	{
+		return NULL;
+	}
 }
 
 bool SMP::checkCollision(Nodes n1, Nodes n2)
 {
-   //TODO: Add Line algorithm
+	//TODO: Add Line algorithm
 	return true;
 }
 
