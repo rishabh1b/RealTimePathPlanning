@@ -1,12 +1,6 @@
 #pragma once
 #include"simulationParam.h"
-struct Nodes
-{
-	ofVec2f location;
-	Nodes *parent;
-	bool alive = true;
-	ofColor color= { 10, 12, 160 };
-};
+#include"nodeStruct.h"
 //--------------------------------------------------------------class
 class Enviroment
 {
