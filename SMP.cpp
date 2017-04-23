@@ -30,11 +30,20 @@ Nodes* SMP::nearestNode(Nodes n)
 	}
 }
 
-bool SMP::checkCollision(Nodes n1, Nodes n2)
+bool SMP::checkCollision(Nodes n1, Nodes n2, const list<obstacles> obst)
 {
-	//TODO: Add Line algorithm
-	return true;
+	ofVec2f temp= n2.location - n1.location;
+	float m = temp.y / temp.x;
+	float c = n1.location.y - m* n1.location.x;
+	for (auto i : obst) {
+		float dist = abs(m*i.loc().x - i.loc().y + c) / hypot(m, 1);
+		if (dist < i.rad()) {
+			return false;
+		}
+	}
+	return false;
 }
+
 
 Nodes SMP::sampler()
 {
@@ -46,8 +55,10 @@ Nodes SMP::sampler()
 	return new_node;
 }
 
-bool SMP::checkSample(Nodes n)
+bool SMP::checkSample(Nodes n, const list<obstacles> obst)
 {
-	//TODO: check whether samples incorrectly in obstacle region
+	for (auto i : obst) {
+		if (n.location.distance(i.loc()) <= i.rad()) return false;
+	}
 	return true;
 }

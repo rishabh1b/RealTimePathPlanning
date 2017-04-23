@@ -31,16 +31,11 @@ void Robot::render()
 	ofFill();
 	ofSetColor(color);
 	this->line.draw();
-	//ofDrawCircle(location.x(), location.y(), r);
 	ofNoFill();
 	ofSetColor(color);
 	ofDrawCircle(location.x,location.y,scanRadius);
 	ofPushMatrix();
 	ofTranslate(location.x,location.y);
-	//char Str[3]; // an array of chars
-	////ofSetColor({ 0,0,0 });
-	//sprintf(Str, "%d", battery);
-	//myfont.drawString(Str, -10, scanRadius+2);
 	ofRotate(ofRadToDeg(atan2(velocity.y, velocity.x) + PI / 2));
 	ofFill();
 	ofBeginShape();
@@ -49,14 +44,7 @@ void Robot::render()
 	ofVertex(r, r * 2);
 	ofEndShape(true);
 	ofPopMatrix();
-	//ofNoFill();
-	//ofDrawCircle(location.x, location.y, scanRadius-3);
 	ofNoFill();
-	//for (float i = 0; i <= 0.1; i += 0.05) {
-	//	ofDrawCircle(location.x(), location.y(), sin(i*ofGetFrameNum())*scanRadius);
-	//	//ofDrawCircle(0, 0, sin(i*ofGetFrameNum())*scanRadius);
-	//}
-	//ofDrawBitmapString("quadA", ofGetMouseX(), ofGetMouseY() + 52);
 	ofDisableAlphaBlending();
 }
 

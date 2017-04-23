@@ -1,7 +1,7 @@
 #include "ofApp.h"
 
 //--------------------------------------------------------------
-void ofApp::setup(){
+void ofApp::setup() {
 #ifdef randomSeed
 	ofSeedRandom(randomSeed);
 #endif // randomSeed
@@ -12,7 +12,7 @@ void ofApp::setup(){
 	ofSetFrameRate(30);
 	ofSetWindowTitle("Dynamic-obstacles");
 	ofBackground(255, 255, 255);
-	
+
 	map.setup();
 	car.setup();
 #ifdef randomSeed
@@ -31,13 +31,11 @@ void ofApp::update(){
 #ifdef CLK
 	auto start = std::chrono::steady_clock::now();
 #endif // DEBUG
-
 	map.update();
 	ofVec2f target;
 	target.set(mouseX, mouseY);
 	car.controller(target);
 	car.update();
-
 #ifdef CLK
 	auto end = std::chrono::steady_clock::now();
 	std::cout << std::endl << "Update:" << std::chrono::duration<double, std::milli>(end - start).count() << " ms" << std::endl;
@@ -52,6 +50,7 @@ void ofApp::draw(){
 
 	map.render();
 	car.render();
+
 
 #ifdef CLK
 	auto end = std::chrono::steady_clock::now();
