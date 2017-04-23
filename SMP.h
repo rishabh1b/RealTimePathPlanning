@@ -1,15 +1,15 @@
 #pragma once
 #include "nodeStruct.h"
 #include "ofMain.h"
-#include "Enviroment.h"
 
-class SMP : public Enviroment
+class SMP
 {
 public:
 	SMP();
-	void addNode(Nodes n);
-	Nodes* nearestNode(Nodes n);
-	bool checkCollision(Nodes n1, Nodes n2);
-	bool checkSample(Nodes n);
-	Nodes sampler();
+	static void addNode(Nodes n, std::list<Nodes>& nodes);
+	static Nodes* nearestNode(Nodes n, std::list<Nodes>& nodes);
+	static Nodes* nearestNode(Nodes n, std::list<Nodes*>& nodes);
+	static bool checkCollision(Nodes n1, Nodes n2);
+	static bool checkSample(Nodes n);
+	static Nodes sampler();
 };

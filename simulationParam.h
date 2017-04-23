@@ -9,3 +9,9 @@
 //--------------------------------------------------------------Enviroment.h
 #define NODE_RADIUS 3
 #define TotalNodes 100
+#define startx 10
+#define starty 20
+#define goalx 80
+#define goaly 80
+#define epsilon 0.5
+#define rrtstarradius 5
