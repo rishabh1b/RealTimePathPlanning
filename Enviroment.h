@@ -70,11 +70,10 @@ inline void Enviroment::update()
 	double dist = u.location.distance((*v).location);
 	if (dist > epsilon)
 	{
-		u.location+=(u.location - v->location).normalized() * epsilon;
-		//float x_n = v->location.x + (u.location.x - v->location.x)  * epsilon / dist;
-		//float y_n = v->location.y + (u.location.y - v->location.y)  * epsilon / dist;
-		//u.location.x = x_n;
-		//u.location.y = y_n;
+		float x_n = v->location.x + (u.location.x - v->location.x)  * epsilon / dist;
+		float y_n = v->location.y + (u.location.y - v->location.y)  * epsilon / dist;
+		u.location.x = x_n;
+		u.location.y = y_n;
 	}
 	std::list<Nodes*> closestNeighbours = rrtstar.findClosestNeighbours(u, rrtstarradius, (this->nodes));
 
@@ -82,7 +81,7 @@ inline void Enviroment::update()
 		return;
 
 	std::list<Nodes*>::iterator it = closestNeighbours.begin();
-	while (it != closestNeighbours.end()) // What if there is only one element?
+	while (it != closestNeighbours.end()) 
 	{
 		if (SMP::checkCollision(u, *(*it),obst))
 			this->safeNeighbours.push_back(*it);
@@ -96,14 +95,16 @@ inline void Enviroment::update()
 	{
 		u.parent = parent;
 		u.costToStart = parent->costToStart + parent->location.distance(u.location);
+		SMP::addNode(u, (this->nodes));
 	}
-	SMP::addNode(u, (this->nodes));
+
 	it = safeNeighbours.begin();
 	while (it != safeNeighbours.end())
 	{
 		if ((*it)->costToStart > u.costToStart + u.location.distance((*it)->location))
 		{
-			(*it)->parent = &u;
+			//(*it)->parent = &u; //Local variable reference can create problems
+			(*it)->parent = &((this->nodes).back());
 			(*it)->costToStart = u.costToStart + u.location.distance((*it)->location);
 		}
 		it++;

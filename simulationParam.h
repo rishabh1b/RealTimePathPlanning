@@ -14,9 +14,9 @@
 #define mForce 1
 #define accur 1.0
 //-------------------------------------------------------------Gen
-#define startx 10
-#define starty 20
+#define startx 500
+#define starty 500
 #define goalx 80
 #define goaly 80
-#define epsilon 0.1
-#define rrtstarradius 100000000
+#define epsilon 5
+#define rrtstarradius 50
