@@ -3,7 +3,9 @@
 struct Nodes
 {
 	ofVec2f location;
-	Nodes *parent;
+	
+	Nodes *parent, *prevParent=NULL;
+
 	bool alive = true;
 	ofColor color = { 10, 12, 160 };
 	float costToStart;
