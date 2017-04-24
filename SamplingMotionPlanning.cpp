@@ -20,12 +20,12 @@ Nodes* SMP::nearestNode(Nodes n, std::list<Nodes>& nodes)
 		std::list<Nodes>::iterator it = nodes.begin();
 		while (it != nodes.end())
 		{
-			it++;
 			if (n.location.squareDistance((*it).location) < min_dist)
 			{
 				min_dist = n.location.squareDistance((*it).location);
 				near_node = &(*it);
 			}
+			it++;
 		}
 		return near_node;
 	}
@@ -42,12 +42,12 @@ Nodes* SMP::nearestNode(Nodes n, std::list<Nodes*>& nodes)
 		std::list<Nodes*>::iterator it = nodes.begin();
 		while (it != nodes.end())
 		{
-			it++;
 			if (n.location.squareDistance((*it)->location) < min_dist)
 			{
 				min_dist = n.location.squareDistance((*it)->location);
 				near_node = *it;
 			}
+			it++;
 		}
 		return near_node;
 	}
@@ -98,6 +98,7 @@ std::list<Nodes*> RRTstar::findClosestNeighbours(Nodes u, float radius, std::lis
 	{
 		if (u.location.squareDistance((*it).location) < radius)
 			closestNeighbours.push_back(&(*it));
+		it++;
 	}
 	return closestNeighbours;
 }

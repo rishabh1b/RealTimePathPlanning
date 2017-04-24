@@ -23,7 +23,7 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 	private:
-		bool updateFlag = false;
+		bool updateFlag = true;
 		Enviroment map;
 		Robot car;
 };

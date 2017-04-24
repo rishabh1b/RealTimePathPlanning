@@ -58,20 +58,23 @@ inline void Enviroment::update()
 		itobs->move();
 		itobs++;
 	}
+
 	Nodes u;
 	do
 	{
 		u = SMP::sampler();
 
-	} while (! SMP::checkSample(u,obst));
+	} while (!SMP::checkSample(u,obst));
+
 	Nodes* v = SMP::nearestNode(u, (this->nodes));
-	double dist = u.location.squareDistance((*v).location);
+	double dist = u.location.distance((*v).location);
 	if (dist > epsilon)
 	{
-		float x_n = v->location.x + (u.location.x - v->location.x)  * epsilon / dist;
-		float y_n = v->location.y + (u.location.y - v->location.y)  * epsilon / dist;
-		u.location.x = x_n;
-		u.location.y = y_n;
+		u.location+=(u.location - v->location).normalized() * epsilon;
+		//float x_n = v->location.x + (u.location.x - v->location.x)  * epsilon / dist;
+		//float y_n = v->location.y + (u.location.y - v->location.y)  * epsilon / dist;
+		//u.location.x = x_n;
+		//u.location.y = y_n;
 	}
 	std::list<Nodes*> closestNeighbours = rrtstar.findClosestNeighbours(u, rrtstarradius, (this->nodes));
 
@@ -94,6 +97,7 @@ inline void Enviroment::update()
 		u.parent = parent;
 		u.costToStart = parent->costToStart + parent->location.distance(u.location);
 	}
+	SMP::addNode(u, (this->nodes));
 	it = safeNeighbours.begin();
 	while (it != safeNeighbours.end())
 	{
@@ -102,6 +106,7 @@ inline void Enviroment::update()
 			(*it)->parent = &u;
 			(*it)->costToStart = u.costToStart + u.location.distance((*it)->location);
 		}
+		it++;
 	}
 
 }
@@ -123,12 +128,12 @@ inline void Enviroment::render()
 			
 			pt.set(i.location.x, i.location.y);line.addVertex(pt);
 			pt.set(i.parent->location.x, i.parent->location.y);line.addVertex(pt);
-			
+			std::cout << i.parent->location.x<<"       "<<i.parent->location.y << endl;
 			line.draw();
 		}
 		int hue = i.alive ? 130 : 80;
 		ofSetColor(i.color, hue);
-		ofDrawCircle(i.location.x, i.location.y, NODE_RADIUS);
+		//ofDrawCircle(i.location.x, i.location.y, NODE_RADIUS);
 	}
 	ofDisableAlphaBlending();
 }
