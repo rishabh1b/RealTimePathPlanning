@@ -38,7 +38,6 @@ protected:
 	bool vechicle = false;
 
 	ofVec2f goal;
-	Nodes* target=NULL;
 
 
 	ofVec2f home;
@@ -62,6 +61,8 @@ inline void Enviroment::setup()
 	Nodes start(startx, starty, 0);
 	this->nodes.push_back(start);
 	goal.set(goalx, goaly);
+	SMP::goal = goal;
+	SMP::goalFound = false;
 }
 
 inline void Enviroment::update()
@@ -73,6 +74,7 @@ inline void Enviroment::update()
 	}*/
 
 	rrtstar.nextIter(nodes, obst);
+	/*
 	if (rrtFlag) {
 		std::list<Nodes>::iterator it = nodes.begin();
 		while (it != nodes.end())
@@ -84,12 +86,12 @@ inline void Enviroment::update()
 			}
 			it++;
 		}
-	}
+	}*/
 
-	if (!rrtFlag && !planner)
+	if (SMP::goalFound && !planner)
 	{
 		path.clear();
-		Nodes *pathNode = target;
+		Nodes *pathNode = SMP::target;
 		do
 		{
 			path.push_back(*pathNode);
@@ -136,7 +138,7 @@ inline void Enviroment::render()
 	{
 		ofSetColor({ 10,10,10 });
 
-		if (i.parent != NULL) {
+		if (i.parent != NULL && i.prevParent == NULL) {
 			ofPoint pt;ofPolyline line;
 			pt.set(i.location.x, i.location.y);line.addVertex(pt);
 			pt.set(i.parent->location.x, i.parent->location.y);line.addVertex(pt);
