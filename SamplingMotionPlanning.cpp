@@ -1,5 +1,10 @@
 #include "SMP.h"
 #include "RRTstar.h"
+#include "simulationParam.h"
+
+bool SMP::goalFound = false;
+ofVec2f SMP::goal;
+Nodes* SMP::target = NULL;
 
 SMP::SMP()
 {
@@ -9,6 +14,11 @@ SMP::SMP()
 void SMP::addNode(Nodes n, std::list<Nodes>& nodes)
 {
 	nodes.push_back(n);
+	if (n.location.distance(goal) < converge)
+	{
+		goalFound = true;
+		target = &(nodes.back());
+	}
 }
 
 Nodes* SMP::nearestNode(Nodes n, std::list<Nodes>& nodes)
@@ -144,6 +154,8 @@ void RRTstar::nextIter(std::list<Nodes>& nodes,const list<obstacles> obst)
 
 	safeNeighbours.remove(*index);
 
+	// Bring the iterator to initial position again
+	it = safeNeighbours.begin();
 	while (it != safeNeighbours.end())
 	{
 		float dist = u.costToStart + u.location.distance((*it)->location);

@@ -13,4 +13,7 @@ public:
 	static bool checkCollision(Nodes n1, Nodes n2, const list<obstacles> obst);
 	static bool checkSample(Nodes n, const list<obstacles> obst);
 	static Nodes sampler();
+	static bool goalFound;
+	static ofVec2f goal;
+	static Nodes* SMP::target;
 };
