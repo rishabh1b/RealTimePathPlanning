@@ -5,7 +5,7 @@
 //--------------------------------------------------------------Macros
 #define M(e) ofMap(e,-1,1,0,1);
 //--------------------------------------------------------------ofApp.h
-#define numberOfobst 20
+#define numberOfobst 30
 //--------------------------------------------------------------Enviroment.h
 #define NODE_RADIUS 3
 //--------------------------------------------------------------Robot.h
@@ -20,4 +20,4 @@
 #define goaly 200
 #define converge 50.0
 #define epsilon 5
-#define rrtstarradius 35
+#define rrtstarradius 15

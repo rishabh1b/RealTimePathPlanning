@@ -9,9 +9,11 @@ public:
 	//--------------------------------------------------------------Function
 	// Default constructor  
 	Robot() { setup(); }
+	//Robot(ofVec2f loc) { setup(loc);}
 	// Default destructor  
 	~Robot() {};
 	void setup();
+	void setup(ofVec2f loc);
 	// Update method
 	void update();
 	//Render method

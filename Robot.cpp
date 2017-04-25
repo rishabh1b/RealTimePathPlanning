@@ -13,6 +13,18 @@ void Robot::setup()
 		color = { ofRandom(0,255),ofRandom(0,255) ,ofRandom(0,255) };
 }
 
+void Robot::setup(ofVec2f loc)
+{
+	alive = true; mass = 5.0; scanRadius = sensorRadius; accuracy = accur;
+	location = loc;
+	HOME = location;
+	velocity.set(0.0, 0.0);
+	accelaration.set(0.0, 0.0);
+	maxVelocity.set(mVal, mVal);
+	maxForce.set(mForce, mForce);
+	color = { ofRandom(0,255),ofRandom(0,255) ,ofRandom(0,255) };
+}
+
 void Robot::update()
 {
 	velocity += accelaration;
@@ -59,7 +71,15 @@ void Robot::controller(ofVec2f target)
 	//error.normalize();
 	//error *= 1.5;
 	//accelaration = error;
-	ofVec2f temp = error.normalized()*mVal;
+	float m;
+	if (error.length() < converge) {
+		m = ofMap(error.length(), 0, converge, 0, mVal);
+	}
+	else {
+		m = mVal;
+	}
+
+	ofVec2f temp = error.normalized()*m;
 	ofVec2f steer = (temp - velocity);
 	steer = (steer.length() <= maxForce.length()) ? steer : (steer.normalized() *mForce);
 	addForce(steer);

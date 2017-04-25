@@ -2,7 +2,7 @@
 
 #include "ofMain.h"
 #include "Enviroment.h"
-#include "Robot.h"
+//#include "Robot.h"
 
 class ofApp : public ofBaseApp{
 
@@ -25,5 +25,5 @@ class ofApp : public ofBaseApp{
 	private:
 		bool updateFlag = true;
 		Enviroment map;
-		Robot car;
+		//Robot car;
 };

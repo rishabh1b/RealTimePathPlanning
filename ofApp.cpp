@@ -11,10 +11,10 @@ void ofApp::setup() {
 	ofSetVerticalSync(true);
 	ofSetFrameRate(30);
 	ofSetWindowTitle("Dynamic-obstacles");
-	ofBackground(255, 255, 255);
+	ofBackground(200,200,200);
 
 	map.setup();
-	car.setup();
+	//car.setup();
 #ifdef randomSeed
 	std::cout << "RandomSeed:" << randomSeed << endl;
 #endif
@@ -33,9 +33,9 @@ void ofApp::update(){
 #endif // DEBUG
 	map.update();
 	ofVec2f target;
-	target.set(mouseX, mouseY);
-	car.controller(target);
-	car.update();
+	//target.set(mouseX, mouseY);
+	//car.controller(target);
+	//car.update();
 #ifdef CLK
 	auto end = std::chrono::steady_clock::now();
 	std::cout << std::endl << "Update:" << std::chrono::duration<double, std::milli>(end - start).count() << " ms" << std::endl;
@@ -49,7 +49,7 @@ void ofApp::draw(){
 #endif // DEBUG
 
 	map.render();
-	car.render();
+	//car.render();
 
 
 #ifdef CLK
@@ -67,6 +67,11 @@ void ofApp::keyPressed(int key){
 	else if(key=='g')
 	{
 		map.grid = !map.grid;
+	}
+	else if (key == 'x') {
+		ofImage img;
+		img.grabScreen(0, 0, ofGetWidth(), ofGetHeight());
+		img.save("screenshot.png");
 	}
 }
 

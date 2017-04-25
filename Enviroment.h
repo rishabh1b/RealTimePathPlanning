@@ -4,6 +4,7 @@
 #include"obstacle.h"
 #include<list>
 #include"SMP.h"
+#include"Robot.h"
 #include"RRTstar.h"
 //--------------------------------------------------------------class
 class Enviroment
@@ -32,15 +33,25 @@ protected:
 	std::list<obstacles> obst;
 	std::list<Nodes> path;
 	RRTstar rrtstar;
-	bool flag = false;
+	bool rrtFlag = true;
+	bool planner = false;
+	bool vechicle = false;
+
 	ofVec2f goal;
 	Nodes* target=NULL;
+
+
+	ofVec2f home;
+	Robot car;
+
 	// A list or an array of Obstacles should come here
 
 };
 
 inline void Enviroment::setup()
 {
+	home.set(startx, starty);
+	car.setup(home);
 
 	for (unsigned int i = 0; i < numberOfobst; i++)
 	{
@@ -55,27 +66,27 @@ inline void Enviroment::setup()
 
 inline void Enviroment::update()
 {
-
 	/*std::list<obstacles>::iterator itobs = obst.begin();
 	while (itobs != obst.end()) {
 		itobs->move();
 		itobs++;
 	}*/
 
-
 	rrtstar.nextIter(nodes, obst);
-	std::list<Nodes>::iterator it = nodes.begin();
-	while (it != nodes.end())
-	{
-		if (it->location.distance(goal) < converge)
+	if (rrtFlag) {
+		std::list<Nodes>::iterator it = nodes.begin();
+		while (it != nodes.end())
 		{
-			flag = !flag;
-			target = &(*it);
-			//std::cout << "Found" << endl;
+			if (it->location.distance(goal) < converge)
+			{
+				rrtFlag = !rrtFlag;
+				target = &(*it);
+			}
+			it++;
 		}
-		it++;
 	}
-	if (flag)
+
+	if (!rrtFlag && !planner)
 	{
 		path.clear();
 		Nodes *pathNode = target;
@@ -84,8 +95,26 @@ inline void Enviroment::update()
 			path.push_back(*pathNode);
 			pathNode = pathNode->parent;
 		} while (pathNode->parent != NULL);
+		planner = !planner;
+		path.reverse();
 	}
-	//rrtstar.nextIter(nodes, obst);
+
+	if (planner && !vechicle) {
+		std::list<Nodes>::iterator pathIt = path.begin();
+
+		while(pathIt !=path.end()){
+			if (pathIt->alive) {
+				car.controller(pathIt->location);
+				float dist= pathIt->location.distance(car.getLocation());
+				if (dist < 2.0) pathIt->alive = false;
+				break;
+			}
+			pathIt++;
+		}
+		if(pathIt!=path.end())
+		car.update();
+
+	}
 }
 
 inline void Enviroment::render()
@@ -96,7 +125,8 @@ inline void Enviroment::render()
 		//cout << i.getX() << "  " << i.getY() << endl;
 	}
 
-	ofSetColor({200, 200, 10});
+
+	ofSetColor({255, 255, 10});
 	ofFill();
 	ofDrawCircle(goal.x, goal.y, NODE_RADIUS);
 	ofNoFill();
@@ -126,7 +156,7 @@ inline void Enviroment::render()
 	}
 	if (!path.empty())
 	{
-		ofSetColor({ 20,250,20 });
+		ofSetColor({ 20,250,30 });
 		ofSetLineWidth(5);
 		for (auto i : path) {
 			if (i.parent != NULL) {
@@ -138,6 +168,7 @@ inline void Enviroment::render()
 		}
 		ofSetLineWidth(1);
 	}
+	car.render();
 	ofDisableAlphaBlending();
 }
 
