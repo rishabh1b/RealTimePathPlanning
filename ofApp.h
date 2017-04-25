@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "Enviroment.h"
+//#include "Robot.h"
 
 class ofApp : public ofBaseApp{
 
@@ -22,6 +23,7 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 	private:
-		bool updateFlag = false;
+		bool updateFlag = true;
 		Enviroment map;
+		//Robot car;
 };
