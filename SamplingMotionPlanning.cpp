@@ -4,6 +4,7 @@
 #include "simulationParam.h"
 
 bool SMP::goalFound = false;
+bool SMP::moveNow = false;
 ofVec2f SMP::goal;
 ofVec2f SMP::start;
 Nodes* SMP::target = NULL;
@@ -217,18 +218,22 @@ void InformedRRTstar::nextIter(std::list<Nodes> &nodes, const std::list<obstacle
 Nodes InformedRRTstar::sample(float c_max)
 {
 	float c_min = SMP::goal.distance(SMP::start);
+
+	if (std::abs(c_max - c_min) < 100) //Putting a dummy value for now - Robot might not move for some configurations with this value
+		SMP::moveNow = true; //TODO: The flag will be associated with time. Should turn on when the spcified time lapses
+
 	ofVec2f x_centre = (SMP::start + SMP::goal) / 2;
 	ofVec2f dir = SMP::goal - SMP::start;
 	dir = dir.getNormalized();
-	float angle = std::atan2(dir.y, dir.x);
+	float angle = std::atan2(-dir.y, dir.x); //Frame is with y pointing downwards
 	float r1 = c_max / 2;
 	float r2 = std::sqrt(std::pow(c_max, 2) - std::pow(c_min, 2)) / 2;
 
-	float x = ofRandom(0, 1);
-	float y = ofRandom(0, 1);
+	float x = ofRandom(-1, 1);
+	float y = ofRandom(-1, 1);
 	
-	float x2 = x * r1 * std::cos(angle) - y * r2 * std::sin(angle);
-	float y2 = x * r1 * std::sin(angle) + y * r2 * std::cos(angle);
+	float x2 = x * r1 * std::cos(angle) + y * r2 * std::sin(angle);
+	float y2 = -x * r1 * std::sin(angle) + y * r2 * std::cos(angle);
 
 	ofVec2f rot_sample, rot_trans_sample;
 	rot_sample.set(x2, y2);

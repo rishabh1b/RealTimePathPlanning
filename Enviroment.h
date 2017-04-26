@@ -63,6 +63,8 @@ inline void Enviroment::setup()
 	Nodes start(startx, starty, 0);
 	this->nodes.push_back(start);
 	goal.set(goalx, goaly);
+
+	SMP::start.set(startx, starty);
 	SMP::goal = goal;
 	SMP::goalFound = false;
 }
@@ -91,7 +93,11 @@ inline void Enviroment::update()
 		}
 	}*/
 
-	if (SMP::goalFound && !planner)
+	// goalFound flag turns on in addNode method when new-sample is sampled in goal region
+	if (SMP::goalFound)
+		SMP::goalFound = false;
+
+	if (SMP::moveNow && !planner)
 	{
 		path.clear();
 		Nodes *pathNode = SMP::target;
@@ -101,7 +107,7 @@ inline void Enviroment::update()
 			pathNode = pathNode->parent;
 		} while (pathNode->parent != NULL);
 		planner = !planner;
-		SMP::goalFound = false;
+		SMP::moveNow = false;
 		path.reverse();
 	}
 
