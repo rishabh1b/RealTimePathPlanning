@@ -1,9 +1,12 @@
 #include "SMP.h"
 #include "RRTstar.h"
+#include "InformedRRTstar.h"
 #include "simulationParam.h"
 
 bool SMP::goalFound = false;
+bool SMP::moveNow = false;
 ofVec2f SMP::goal;
+ofVec2f SMP::start;
 Nodes* SMP::target = NULL;
 
 SMP::SMP()
@@ -100,10 +103,14 @@ bool SMP::checkSample(Nodes n, const list<obstacles> obst)
 	return true;
 }
 
-void RRTstar::nextIter(std::list<Nodes>& nodes,const list<obstacles> obst)
+void RRTstar::nextIter(std::list<Nodes>& nodes,const list<obstacles> obst, Nodes* u_)
 {
+	Nodes u;
+	if (u_ == NULL)
+		u = SMP::sampler();
+	else
+		u = *u_;
 
-	Nodes u = SMP::sampler();
 	Nodes* v = SMP::nearestNode(u, nodes);
 	double dist = u.location.distance((*v).location);
 
@@ -183,4 +190,58 @@ std::list<Nodes*> RRTstar::findClosestNeighbours(Nodes u, float radius, std::lis
 		it++;
 	}
 	return closestNeighbours;
+}
+
+void InformedRRTstar::nextIter(std::list<Nodes> &nodes, const std::list<obstacles> obst)
+{
+	if (sol_nodes.empty())
+	{
+		RRTstar::nextIter(nodes, obst);
+	}
+	else
+	{
+		float min_cost = sol_nodes.front()->costToStart;
+		std::list<Nodes*>::iterator it = sol_nodes.begin();
+		while (it != sol_nodes.end())
+		{
+			if ((*it)->costToStart < min_cost)
+				min_cost = (*it)->costToStart;
+			it++;
+		}
+
+		RRTstar::nextIter(nodes, obst, &sample(min_cost));
+	}
+	if (SMP::goalFound)
+		sol_nodes.push_back(&nodes.back());
+}
+
+Nodes InformedRRTstar::sample(float c_max)
+{
+	float c_min = SMP::goal.distance(SMP::start);
+
+	if (std::abs(c_max - c_min) < 100) //Putting a dummy value for now - Robot might not move for some configurations with this value
+		SMP::moveNow = true; //TODO: The flag will be associated with time. Should turn on when the spcified time lapses
+
+	ofVec2f x_centre = (SMP::start + SMP::goal) / 2;
+	ofVec2f dir = SMP::goal - SMP::start;
+	dir = dir.getNormalized();
+	float angle = std::atan2(-dir.y, dir.x); //Frame is with y pointing downwards
+	float r1 = c_max / 2;
+	float r2 = std::sqrt(std::pow(c_max, 2) - std::pow(c_min, 2)) / 2;
+
+	float x = ofRandom(-1, 1);
+	float y = ofRandom(-1, 1);
+	
+	float x2 = x * r1 * std::cos(angle) + y * r2 * std::sin(angle);
+	float y2 = -x * r1 * std::sin(angle) + y * r2 * std::cos(angle);
+
+	ofVec2f rot_sample, rot_trans_sample;
+	rot_sample.set(x2, y2);
+	rot_trans_sample = rot_sample + x_centre;
+
+	Nodes n;
+	n.location.x = rot_trans_sample.x;
+	n.location.y = rot_trans_sample.y;
+
+	return n;
 }

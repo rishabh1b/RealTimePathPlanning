@@ -14,6 +14,8 @@ public:
 	static bool checkSample(Nodes n, const list<obstacles> obst);
 	static Nodes sampler();
 	static bool goalFound;
+	static bool moveNow;
+	static ofVec2f SMP::start;
 	static ofVec2f goal;
 	static Nodes* SMP::target;
 };

@@ -6,6 +6,7 @@
 #include"SMP.h"
 #include"Robot.h"
 #include"RRTstar.h"
+#include"InformedRRTstar.h"
 //--------------------------------------------------------------class
 class Enviroment
 {
@@ -33,6 +34,7 @@ protected:
 	std::list<obstacles> obst;
 	std::list<Nodes> path;
 	RRTstar rrtstar;
+	InformedRRTstar irrtstar;
 	bool rrtFlag = true;
 	bool planner = false;
 	bool vechicle = false;
@@ -61,6 +63,8 @@ inline void Enviroment::setup()
 	Nodes start(startx, starty, 0);
 	this->nodes.push_back(start);
 	goal.set(goalx, goaly);
+
+	SMP::start.set(startx, starty);
 	SMP::goal = goal;
 	SMP::goalFound = false;
 }
@@ -73,7 +77,8 @@ inline void Enviroment::update()
 		itobs++;
 	}*/
 
-	rrtstar.nextIter(nodes, obst);
+	//rrtstar.nextIter(nodes, obst);
+	irrtstar.nextIter(nodes, obst);
 	/*
 	if (rrtFlag) {
 		std::list<Nodes>::iterator it = nodes.begin();
@@ -88,7 +93,11 @@ inline void Enviroment::update()
 		}
 	}*/
 
-	if (SMP::goalFound && !planner)
+	// goalFound flag turns on in addNode method when new-sample is sampled in goal region
+	if (SMP::goalFound)
+		SMP::goalFound = false;
+
+	if (SMP::moveNow && !planner)
 	{
 		path.clear();
 		Nodes *pathNode = SMP::target;
@@ -98,6 +107,7 @@ inline void Enviroment::update()
 			pathNode = pathNode->parent;
 		} while (pathNode->parent != NULL);
 		planner = !planner;
+		SMP::moveNow = false;
 		path.reverse();
 	}
 

@@ -19,5 +19,5 @@
 #define goalx 250
 #define goaly 200
 #define converge 50.0
-#define epsilon 5
+#define epsilon 10
 #define rrtstarradius 15
