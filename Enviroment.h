@@ -13,13 +13,15 @@ class Enviroment
 public:
 	//--------------------------------------------------------------Function
 	// Default constructor  
-	Enviroment() {};
+	Enviroment() { setup(); };
+	Enviroment(ofVec2f _start, ofVec2f _goal) { setup(_start,_goal); };
 	// Default destructor  
 	~Enviroment() {};
 	// Setup method
 	void setup();
+	void setup(ofVec2f _start, ofVec2f _goal);
 	// Update method
-	void update();
+	void update(Robot *car);
 	// Render method draw nodes in enviroment.
 	void render();
 
@@ -43,7 +45,7 @@ protected:
 
 
 	ofVec2f home;
-	Robot car;
+	//Robot *car;
 
 	// A list or an array of Obstacles should come here
 
@@ -52,7 +54,7 @@ protected:
 inline void Enviroment::setup()
 {
 	home.set(startx, starty);
-	car.setup(home);
+	/*car = new Robot(home);*/
 
 	for (unsigned int i = 0; i < numberOfobst; i++)
 	{
@@ -69,7 +71,28 @@ inline void Enviroment::setup()
 	SMP::goalFound = false;
 }
 
-inline void Enviroment::update()
+
+inline void Enviroment::setup(ofVec2f _start,ofVec2f _goal)
+{
+	home = _start;
+	//car = new Robot(home);
+
+	for (unsigned int i = 0; i < numberOfobst; i++)
+	{
+		obstacles ob;
+		obst.push_back(ob);
+	}
+
+	Nodes start(home.x, home.y, 0);
+	this->nodes.push_back(start);
+	goal = _goal;
+
+	SMP::start.set(startx, starty);
+	SMP::goal = goal;
+	SMP::goalFound = false;
+}
+
+inline void Enviroment::update(Robot *car)
 {
 	/*std::list<obstacles>::iterator itobs = obst.begin();
 	while (itobs != obst.end()) {
@@ -116,15 +139,15 @@ inline void Enviroment::update()
 
 		while(pathIt !=path.end()){
 			if (pathIt->alive) {
-				car.controller(pathIt->location);
-				float dist= pathIt->location.distance(car.getLocation());
+				car->controller(pathIt->location);
+				float dist= pathIt->location.distance(car->getLocation());
 				if (dist < 2.0) pathIt->alive = false;
 				break;
 			}
 			pathIt++;
 		}
 		if(pathIt!=path.end())
-		car.update();
+		car->update();
 
 	}
 }
@@ -180,7 +203,6 @@ inline void Enviroment::render()
 		}
 		ofSetLineWidth(1);
 	}
-	car.render();
 	ofDisableAlphaBlending();
 }
 

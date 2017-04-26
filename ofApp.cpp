@@ -12,8 +12,7 @@ void ofApp::setup() {
 	ofSetFrameRate(30);
 	ofSetWindowTitle("Dynamic-obstacles");
 	ofBackground(200,200,200);
-
-	map.setup();
+	//map = new Enviroment();
 	//car.setup();
 #ifdef randomSeed
 	std::cout << "RandomSeed:" << randomSeed << endl;
@@ -31,11 +30,7 @@ void ofApp::update(){
 #ifdef CLK
 	auto start = std::chrono::steady_clock::now();
 #endif // DEBUG
-	map.update();
-	ofVec2f target;
-	//target.set(mouseX, mouseY);
-	//car.controller(target);
-	//car.update();
+	if (map!= NULL) map->update(car);
 #ifdef CLK
 	auto end = std::chrono::steady_clock::now();
 	std::cout << std::endl << "Update:" << std::chrono::duration<double, std::milli>(end - start).count() << " ms" << std::endl;
@@ -48,8 +43,8 @@ void ofApp::draw(){
 	auto start = std::chrono::steady_clock::now();
 #endif // DEBUG
 
-	map.render();
-	//car.render();
+	if (map != NULL) map->render();
+	if (car!= NULL) car->render();
 
 
 #ifdef CLK
@@ -66,7 +61,7 @@ void ofApp::keyPressed(int key){
 	}
 	else if(key=='g')
 	{
-		map.grid = !map.grid;
+		map->grid = !map->grid;
 	}
 	else if (key == 'x') {
 		ofImage img;
@@ -92,7 +87,19 @@ void ofApp::mouseDragged(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
+	ofVec2f loc;
+	loc.set(x, y);
+	if (button == 0) {
+		if (car != NULL)
+		map = new Enviroment(car->getLocation(), loc);
+	}
+	else if (button == 2) {
+		car = new Robot(loc);
+	}
+	else
+	{
 
+	}
 }
 
 //--------------------------------------------------------------

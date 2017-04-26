@@ -9,7 +9,7 @@ public:
 	//--------------------------------------------------------------Function
 	// Default constructor  
 	Robot() { setup(); }
-	//Robot(ofVec2f loc) { setup(loc);}
+	Robot(ofVec2f loc) { setup(loc);}
 	// Default destructor  
 	~Robot() {};
 	void setup();
