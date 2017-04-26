@@ -4,6 +4,6 @@
 class RRTstar : public SMP
 {
 public:
-	void nextIter(std::list<Nodes> &nodes,const std::list<obstacles> obst);
+	virtual void nextIter(std::list<Nodes> &nodes,const std::list<obstacles> obst, Nodes* u_ = NULL);
 	std::list<Nodes*> findClosestNeighbours(Nodes n, float radius, std::list<Nodes>& nodes);
 };

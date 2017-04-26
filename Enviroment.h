@@ -6,6 +6,7 @@
 #include"SMP.h"
 #include"Robot.h"
 #include"RRTstar.h"
+#include"InformedRRTstar.h"
 //--------------------------------------------------------------class
 class Enviroment
 {
@@ -33,6 +34,7 @@ protected:
 	std::list<obstacles> obst;
 	std::list<Nodes> path;
 	RRTstar rrtstar;
+	InformedRRTstar irrtstar;
 	bool rrtFlag = true;
 	bool planner = false;
 	bool vechicle = false;
@@ -73,7 +75,8 @@ inline void Enviroment::update()
 		itobs++;
 	}*/
 
-	rrtstar.nextIter(nodes, obst);
+	//rrtstar.nextIter(nodes, obst);
+	irrtstar.nextIter(nodes, obst);
 	/*
 	if (rrtFlag) {
 		std::list<Nodes>::iterator it = nodes.begin();
@@ -98,6 +101,7 @@ inline void Enviroment::update()
 			pathNode = pathNode->parent;
 		} while (pathNode->parent != NULL);
 		planner = !planner;
+		SMP::goalFound = false;
 		path.reverse();
 	}
 
