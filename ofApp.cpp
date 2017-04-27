@@ -14,6 +14,8 @@ void ofApp::setup() {
 	ofBackground(200,200,200);
 	//map = new Enviroment();
 	//car.setup();
+	std::cout << ofGetElapsedTimef();
+
 #ifdef randomSeed
 	std::cout << "RandomSeed:" << randomSeed << endl;
 #endif
