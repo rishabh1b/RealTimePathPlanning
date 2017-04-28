@@ -84,6 +84,31 @@ void Robot::controller(ofVec2f target)
 	steer = (steer.length() <= maxForce.length()) ? steer : (steer.normalized() *mForce);
 	addForce(steer);
 }
+
+void Robot::fillEnviroment(const list<obstacles> obst, list<Nodes>& node)
+{
+	//check for enviroment
+	for (auto index : obst) {
+		float dist = this->location.distance(index.loc());
+		if (dist <= this->scanRadius + index.rad()) {
+			updateEnviroment(node, index);
+		}
+	}
+}
+
+void Robot::updateEnviroment(list<Nodes>& node,obstacles obst)
+{
+	std::list<Nodes>::iterator it = node.begin();
+	while (it != node.end())
+	{
+		float dist = it->location.distance(obst.loc());
+		if (dist <= obst.rad()) {
+			it->costToStart = inf;
+			it->alive = false;
+		}
+	}
+}
+
 //
 //inline void quadCopter::fly(Nodes *& nodes)
 //{
