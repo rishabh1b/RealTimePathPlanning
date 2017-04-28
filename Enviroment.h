@@ -1,12 +1,13 @@
 #pragma once
 #include"simulationParam.h"
-#include"nodeStruct.h"
+//#include"nodeStruct.h"
 #include"obstacle.h"
 #include<list>
 #include"SMP.h"
 #include"Robot.h"
 #include"RRTstar.h"
 #include"InformedRRTstar.h"
+#include"Kdtree.h"
 //--------------------------------------------------------------class
 class Enviroment
 {
@@ -14,7 +15,7 @@ public:
 	//--------------------------------------------------------------Function
 	// Default constructor  
 	Enviroment() { setup(); };
-	Enviroment(ofVec2f _start, ofVec2f _goal) { setup(_start,_goal); };
+	Enviroment(ofVec2f _start, ofVec2f _goal) { setup(_start, _goal); };
 	// Default destructor  
 	~Enviroment() {};
 	// Setup method
@@ -32,7 +33,9 @@ private:
 	//--------------------------------------------------------------Variables
 protected:
 	//--------------------------------------------------------------Variables
-	std::list<Nodes> nodes;
+	/*std::list<Nodes> nodes;*/
+
+	Nodes node;
 	std::list<obstacles> obst;
 	std::list<Nodes> path;
 	RRTstar rrtstar;
@@ -42,9 +45,11 @@ protected:
 	bool vechicle = false;
 
 	ofVec2f goal;
-
-
 	ofVec2f home;
+
+
+	Data treeRoot;
+
 	//Robot *car;
 
 	// A list or an array of Obstacles should come here
@@ -63,7 +68,9 @@ inline void Enviroment::setup()
 	}
 
 	Nodes start(startx, starty, 0);
-	this->nodes.push_back(start);
+
+	treeRoot = *(insert(&treeRoot, start));
+
 	goal.set(goalx, goaly);
 
 	SMP::start.set(startx, starty);
@@ -72,7 +79,7 @@ inline void Enviroment::setup()
 }
 
 
-inline void Enviroment::setup(ofVec2f _start,ofVec2f _goal)
+inline void Enviroment::setup(ofVec2f _start, ofVec2f _goal)
 {
 	home = _start;
 	//car = new Robot(home);
@@ -84,7 +91,9 @@ inline void Enviroment::setup(ofVec2f _start,ofVec2f _goal)
 	}
 
 	Nodes start(home.x, home.y, 0);
-	this->nodes.push_back(start);
+	//this->nodes.push_back(start);
+	treeRoot = *(insert(&treeRoot, start));
+
 	goal = _goal;
 
 	SMP::start.set(startx, starty);
@@ -100,8 +109,8 @@ inline void Enviroment::update(Robot *car)
 		itobs++;
 	}*/
 
-	//rrtstar.nextIter(nodes, obst);
-	irrtstar.nextIter(nodes, obst);
+	rrtstar.nextIter(treeRoot, obst);
+	//irrtstar.nextIter(nodes, obst);
 	/*
 	if (rrtFlag) {
 		std::list<Nodes>::iterator it = nodes.begin();
@@ -117,7 +126,7 @@ inline void Enviroment::update(Robot *car)
 	}*/
 
 	// goalFound flag turns on in addNode method when new-sample is sampled in goal region
-	if (SMP::goalFound)
+	/*if (SMP::goalFound)
 		SMP::goalFound = false;
 
 	if (SMP::moveNow && !planner)
@@ -149,7 +158,7 @@ inline void Enviroment::update(Robot *car)
 		if(pathIt!=path.end())
 		car->update();
 
-	}
+	}*/
 }
 
 inline void Enviroment::render()
@@ -161,34 +170,34 @@ inline void Enviroment::render()
 	}
 
 
-	ofSetColor({255, 255, 10});
+	ofSetColor({ 255, 255, 10 });
 	ofFill();
 	ofDrawCircle(goal.x, goal.y, NODE_RADIUS);
 	ofNoFill();
 	ofDrawCircle(goal.x, goal.y, converge);
 
-	for (auto i : this->nodes)
-	{
-		ofSetColor({ 10,10,10 });
+	//for (auto i : this->nodes)
+	//{
+	//	ofSetColor({ 10,10,10 });
 
-		if (i.parent != NULL && i.prevParent == NULL) {
-			ofPoint pt;ofPolyline line;
-			pt.set(i.location.x, i.location.y);line.addVertex(pt);
-			pt.set(i.parent->location.x, i.parent->location.y);line.addVertex(pt);
-			line.draw();
-		}
-		ofSetColor({ 10,250,250 });
-		if (i.prevParent != NULL) {
-			
-			ofPoint pt; ofPolyline line;
-			pt.set(i.location.x, i.location.y); line.addVertex(pt);
-			pt.set(i.prevParent->location.x, i.prevParent->location.y); line.addVertex(pt);
-			line.draw();
-		}
-		int hue = i.alive ? 130 : 80;
-		ofSetColor(i.color, hue);
-		//ofDrawCircle(i.location.x, i.location.y, NODE_RADIUS);
-	}
+	//	if (i.parent != NULL && i.prevParent == NULL) {
+	//		ofPoint pt;ofPolyline line;
+	//		pt.set(i.location.x, i.location.y);line.addVertex(pt);
+	//		pt.set(i.parent->location.x, i.parent->location.y);line.addVertex(pt);
+	//		line.draw();
+	//	}
+	//	ofSetColor({ 10,250,250 });
+	//	if (i.prevParent != NULL) {
+	//		
+	//		ofPoint pt; ofPolyline line;
+	//		pt.set(i.location.x, i.location.y); line.addVertex(pt);
+	//		pt.set(i.prevParent->location.x, i.prevParent->location.y); line.addVertex(pt);
+	//		line.draw();
+	//	}
+	//	int hue = i.alive ? 130 : 80;
+	//	ofSetColor(i.color, hue);
+	//	//ofDrawCircle(i.location.x, i.location.y, NODE_RADIUS);
+	//}
 	if (!path.empty())
 	{
 		ofSetColor({ 20,250,30 });
