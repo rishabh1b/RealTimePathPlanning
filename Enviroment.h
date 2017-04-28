@@ -14,13 +14,14 @@ public:
 	//--------------------------------------------------------------Function
 	// Default constructor  
 	Enviroment() { setup(); };
-	Enviroment(ofVec2f _start, ofVec2f _goal) { setup(_start,_goal); };
+	Enviroment(ofVec2f _start) { setup(_start); };
 	// Default destructor  
 	~Enviroment() {};
 	// Setup method
 	void setup();
-	void setup(ofVec2f _start, ofVec2f _goal);
+	void setup(ofVec2f _start);
 	void update(Robot * car, list<obstacles*> obst);
+	void targetSet(ofVec2f loc);
 	// Update method
 	void update(Robot *car);
 	// Render method draw nodes in enviroment.
@@ -29,6 +30,7 @@ public:
 	void renderGrid();
 	//--------------------------------------------------------------Variables
 	bool grid = false;
+	bool goalin = false;
 private:
 	//--------------------------------------------------------------Variables
 protected:
@@ -43,8 +45,6 @@ protected:
 	bool vechicle = false;
 
 	ofVec2f goal;
-
-
 	ofVec2f home;
 	//Robot *car;
 
@@ -65,15 +65,14 @@ inline void Enviroment::setup()
 
 	Nodes start(startx, starty, 0);
 	this->nodes.push_back(start);
-	goal.set(goalx, goaly);
-
+	//goal.set(goalx, goaly);
 	SMP::start.set(startx, starty);
-	SMP::goal = goal;
+	//SMP::goal = goal;
 	SMP::goalFound = false;
 }
 
 
-inline void Enviroment::setup(ofVec2f _start,ofVec2f _goal)
+inline void Enviroment::setup(ofVec2f _start)
 {
 	home = _start;
 	//car = new Robot(home);
@@ -86,10 +85,10 @@ inline void Enviroment::setup(ofVec2f _start,ofVec2f _goal)
 
 	Nodes start(home.x, home.y, 0);
 	this->nodes.push_back(start);
-	goal = _goal;
+	//goal = _goal;
 
 	SMP::start.set(startx, starty);
-	SMP::goal = goal;
+	//SMP::goal = goal;
 	SMP::goalFound = false;
 }
 
@@ -153,6 +152,13 @@ inline void Enviroment::update(Robot *car,list<obstacles*> obst)
 	}
 }
 
+inline void Enviroment::targetSet(ofVec2f loc)
+{
+	goal = loc;
+	SMP::goal = goal;
+	goalin = true;
+}
+
 inline void Enviroment::render()
 {
 	ofEnableAlphaBlending();
@@ -163,11 +169,12 @@ inline void Enviroment::render()
 
 
 	ofSetColor({255, 255, 10});
-	ofFill();
-	ofDrawCircle(goal.x, goal.y, NODE_RADIUS);
-	ofNoFill();
-	ofDrawCircle(goal.x, goal.y, converge);
-
+	if (goalin) {
+		ofFill();
+		ofDrawCircle(goal.x, goal.y, NODE_RADIUS);
+		ofNoFill();
+		ofDrawCircle(goal.x, goal.y, converge);
+	}
 	for (auto i : this->nodes)
 	{
 		ofSetColor({ 10,10,10 });

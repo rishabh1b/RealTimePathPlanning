@@ -117,11 +117,13 @@ void ofApp::mousePressed(int x, int y, int button){
 	ofVec2f loc;
 	loc.set(x, y);
 	if (button == 0) {
-		if (car != NULL)
-		map = new Enviroment(car->getLocation(), loc);
+		if (car != NULL) {
+			map->targetSet(loc);
+		}
 	}
 	else if (button == 2) {
 		car = new Robot(loc);
+		map = new Enviroment(car->getLocation());
 	}
 	else
 	{
