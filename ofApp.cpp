@@ -14,8 +14,19 @@ void ofApp::setup() {
 	ofBackground(200,200,200);
 	//map = new Enviroment();
 	//car.setup();
-	std::cout << ofGetElapsedTimef();
+	for (unsigned int i = 0; i < numberOfobst; i++)
+	{
+		obstacles *ob = new obstacles();
+		obst.push_back(ob);
+	}
+	
+	OBST = new movingObst();
+	obstacles *ob = OBST;
+	obst.push_back(ob);
 
+	cout <<"obst size:" <<obst.size() << endl;
+
+	std::cout << ofGetElapsedTimef();
 #ifdef randomSeed
 	std::cout << "RandomSeed:" << randomSeed << endl;
 #endif
@@ -32,7 +43,16 @@ void ofApp::update(){
 #ifdef CLK
 	auto start = std::chrono::steady_clock::now();
 #endif // DEBUG
-	if (map!= NULL) map->update(car);
+#ifdef automatic
+
+	for (auto i : obst) {
+		i->move();
+		//cout << "location: " << i->loc() << "Radius: " << i->rad() << endl;
+		//cout << i.getX() << "  " << i.getY() << endl;
+	}
+#endif // automatic
+
+	if (map!= NULL) map->update(car,obst);
 #ifdef CLK
 	auto end = std::chrono::steady_clock::now();
 	std::cout << std::endl << "Update:" << std::chrono::duration<double, std::milli>(end - start).count() << " ms" << std::endl;
@@ -45,9 +65,11 @@ void ofApp::draw(){
 	auto start = std::chrono::steady_clock::now();
 #endif // DEBUG
 
+	for (auto i : obst) {
+		i->render();
+	}
 	if (map != NULL) map->render();
 	if (car!= NULL) car->render();
-
 
 #ifdef CLK
 	auto end = std::chrono::steady_clock::now();
@@ -70,11 +92,14 @@ void ofApp::keyPressed(int key){
 		img.grabScreen(0, 0, ofGetWidth(), ofGetHeight());
 		img.save("screenshot.png");
 	}
+#ifdef manual
+	OBST->move(key);
+#endif // manual
+
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-
 }
 
 //--------------------------------------------------------------

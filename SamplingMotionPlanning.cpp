@@ -79,14 +79,14 @@ Nodes SMP::sampler()
 	return new_node;
 }
 
-bool SMP::checkCollision(Nodes n1, Nodes n2, const list<obstacles> obst)
+bool SMP::checkCollision(Nodes n1, Nodes n2, list<obstacles*> obst)
 {
 	ofVec2f temp = n2.location - n1.location;
 	float m = temp.y / temp.x;
 	float c = n1.location.y - m* n1.location.x;
 	for (auto i : obst) {
-		float dist = abs(m*i.loc().x - i.loc().y + c) / hypot(m, 1);
-		if (dist < i.rad()) {
+		float dist = abs(m*i->loc().x - i->loc().y + c) / hypot(m, 1);
+		if (dist < i->rad()) {
 			return false;
 		}
 	}
@@ -95,15 +95,16 @@ bool SMP::checkCollision(Nodes n1, Nodes n2, const list<obstacles> obst)
 
 
 
-bool SMP::checkSample(Nodes n, const list<obstacles> obst)
+bool SMP::checkSample(Nodes n,  list<obstacles*> obst)
 {
 	for (auto i : obst) {
-		if (n.location.distance(i.loc()) <= i.rad()) return false;
+		/*cout << "location: " << i->loc() << "Radius: " << i->rad() << endl;*/
+		if (n.location.distance(i->loc()) <= i->rad()) return false;
 	}
 	return true;
 }
 
-void RRTstar::nextIter(std::list<Nodes>& nodes,const list<obstacles> obst, Nodes* u_)
+void RRTstar::nextIter(std::list<Nodes>& nodes,list<obstacles*> obst, Nodes* u_)
 {
 	Nodes u;
 	if (u_ == NULL)
@@ -192,7 +193,7 @@ std::list<Nodes*> RRTstar::findClosestNeighbours(Nodes u, float radius, std::lis
 	return closestNeighbours;
 }
 
-void InformedRRTstar::nextIter(std::list<Nodes> &nodes, const std::list<obstacles> obst)
+void InformedRRTstar::nextIter(std::list<Nodes> &nodes, std::list<obstacles*> obst)
 {
 	if (sol_nodes.empty())
 	{

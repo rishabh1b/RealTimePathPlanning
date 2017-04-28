@@ -20,6 +20,7 @@ public:
 	// Setup method
 	void setup();
 	void setup(ofVec2f _start, ofVec2f _goal);
+	void update(Robot * car, list<obstacles*> obst);
 	// Update method
 	void update(Robot *car);
 	// Render method draw nodes in enviroment.
@@ -33,7 +34,7 @@ private:
 protected:
 	//--------------------------------------------------------------Variables
 	std::list<Nodes> nodes;
-	std::list<obstacles> obst;
+	//std::list<obstacles> obst;
 	std::list<Nodes> path;
 	RRTstar rrtstar;
 	InformedRRTstar irrtstar;
@@ -56,11 +57,11 @@ inline void Enviroment::setup()
 	home.set(startx, starty);
 	/*car = new Robot(home);*/
 
-	for (unsigned int i = 0; i < numberOfobst; i++)
-	{
-		obstacles ob;
-		obst.push_back(ob);
-	}
+	//for (unsigned int i = 0; i < numberOfobst; i++)
+	//{
+	//	obstacles ob;
+	//	obst.push_back(ob);
+	//}
 
 	Nodes start(startx, starty, 0);
 	this->nodes.push_back(start);
@@ -77,11 +78,11 @@ inline void Enviroment::setup(ofVec2f _start,ofVec2f _goal)
 	home = _start;
 	//car = new Robot(home);
 
-	for (unsigned int i = 0; i < numberOfobst; i++)
-	{
-		obstacles ob;
-		obst.push_back(ob);
-	}
+	//for (unsigned int i = 0; i < numberOfobst; i++)
+	//{
+	//	obstacles ob;
+	//	obst.push_back(ob);
+	//}
 
 	Nodes start(home.x, home.y, 0);
 	this->nodes.push_back(start);
@@ -92,7 +93,7 @@ inline void Enviroment::setup(ofVec2f _start,ofVec2f _goal)
 	SMP::goalFound = false;
 }
 
-inline void Enviroment::update(Robot *car)
+inline void Enviroment::update(Robot *car,list<obstacles*> obst)
 {
 	/*std::list<obstacles>::iterator itobs = obst.begin();
 	while (itobs != obst.end()) {
@@ -155,10 +156,10 @@ inline void Enviroment::update(Robot *car)
 inline void Enviroment::render()
 {
 	ofEnableAlphaBlending();
-	for (auto i : obst) {
-		i.render();
-		//cout << i.getX() << "  " << i.getY() << endl;
-	}
+	//for (auto i : obst) {
+	//	i.render();
+	//	//cout << i.getX() << "  " << i.getY() << endl;
+	//}
 
 
 	ofSetColor({255, 255, 10});

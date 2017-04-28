@@ -1,11 +1,20 @@
 #pragma once
 #include "ofMain.h"
+#include <limits>
 //#define randomSeed 5
 //#define CLK
 //--------------------------------------------------------------Macros
 #define M(e) ofMap(e,-1,1,0,1);
+const float inf = std::numeric_limits<float>::infinity();
 //--------------------------------------------------------------ofApp.h
-#define numberOfobst 30
+#define numberOfobst 0
+//--------------------------------------------------------------obstracle.h
+//#define manual
+#define obstMaxVelocity 5
+#ifndef manual
+#define obstMaxVelocity 1
+#define automatic
+#endif // !manual
 //--------------------------------------------------------------Enviroment.h
 #define NODE_RADIUS 3
 //--------------------------------------------------------------Robot.h

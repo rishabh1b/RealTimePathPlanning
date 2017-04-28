@@ -13,7 +13,6 @@ struct Nodes
 	{
 
 	}
-
 	Nodes(float x_, float y_, float costToStart_, Nodes* p_ = NULL)
 	{
 		location.x = x_;

@@ -25,4 +25,6 @@ class ofApp : public ofBaseApp{
 		bool updateFlag = true;
 		Enviroment *map;
 		Robot *car;
+		std::list<obstacles*> obst;
+		movingObst *OBST;
 };
