@@ -101,3 +101,30 @@ void movingObst::move()
 	location += velocity;
 }
 #endif // automatic
+
+maze::maze(ofVec2f loc)
+{
+	location = loc;
+	color = { 10,10,50 };
+	height = 0.40*ofGetHeight();
+	width = 20;
+}
+
+maze::~maze()
+{
+}
+
+void maze::render()
+{
+	ofEnableAlphaBlending();
+	ofSetColor(color);
+	ofFill();
+	ofRect(location.x, location.y, width, height);
+	ofNoFill();
+	ofDisableAlphaBlending();
+}
+
+void maze::move()
+{
+
+}

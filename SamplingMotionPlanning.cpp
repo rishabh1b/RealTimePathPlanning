@@ -85,9 +85,14 @@ bool SMP::checkCollision(Nodes n1, Nodes n2, list<obstacles*> obst)
 	float m = temp.y / temp.x;
 	float c = n1.location.y - m* n1.location.x;
 	for (auto i : obst) {
+		if (i->isCircle()) {
 		float dist = abs(m*i->loc().x - i->loc().y + c) / hypot(m, 1);
 		if (dist < i->rad()) {
 			return false;
+		}
+		}
+		else {
+			continue;
 		}
 	}
 	return true;
@@ -99,7 +104,13 @@ bool SMP::checkSample(Nodes n,  list<obstacles*> obst)
 {
 	for (auto i : obst) {
 		/*cout << "location: " << i->loc() << "Radius: " << i->rad() << endl;*/
-		if (n.location.distance(i->loc()) <= i->rad()) return false;
+		if (i->isCircle()) {
+			if (n.location.distance(i->loc()) <= i->rad()) return false;
+		}
+		else
+		{
+			continue;
+		}
 	}
 	return true;
 }

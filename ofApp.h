@@ -27,4 +27,5 @@ class ofApp : public ofBaseApp{
 		Robot *car;
 		std::list<obstacles*> obst;
 		movingObst *OBST;
+		maze *wall;
 };

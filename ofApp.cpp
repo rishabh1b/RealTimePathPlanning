@@ -24,6 +24,20 @@ void ofApp::setup() {
 	obstacles *ob = OBST;
 	obst.push_back(ob);
 
+	ofVec2f w;
+	w.set(ofGetWidth() / 2, 0);
+	wall = new maze(w);
+	ob = wall;
+	obst.push_back(ob);
+
+	w.set(ofGetWidth() / 2, 0.6*ofGetHeight());
+	wall = new maze(w);
+	ob = wall;
+	obst.push_back(ob);
+
+
+
+
 	cout <<"obst size:" <<obst.size() << endl;
 
 	std::cout << ofGetElapsedTimef();

@@ -12,7 +12,7 @@ public:
 	virtual float rad() { return radius; }
 	float getX() { return location.x;}
 	float getY() { return location.y;}
-
+	virtual  bool isCircle() { return true; }
 private:
 	ofVec2f location;
 	float radius;
@@ -32,6 +32,7 @@ public:
 #endif // automatic
 	ofVec2f loc() { return this->location; }
 	float rad() { return this->radius; }
+	bool isCircle() { return true; }
 private:
 	ofVec2f location;
 	float radius;
@@ -40,4 +41,19 @@ private:
 #ifdef automatic
 	ofVec2f velocity;
 #endif // automatic
+};
+
+class maze:public obstacles
+{
+public:
+	maze(ofVec2f loc);
+	~maze();
+	void render();
+	void move();
+	ofVec2f getloc() { return this->location;}
+	bool isCircle() { return false; }
+private:
+	ofColor color;
+	ofVec2f location;
+	float width, height;
 };
