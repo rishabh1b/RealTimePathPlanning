@@ -20,7 +20,7 @@ obstacles::~obstacles()
 {
 }
 
-void obstacles::move()
+void obstacles::move()  
 {
 	float stepsize = ofRandom(0, 10);
 	float stepx = ofRandom(-stepsize, stepsize);

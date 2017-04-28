@@ -62,6 +62,7 @@ inline void Enviroment::setup()
 
 	Nodes start(startx, starty, 0);
 	this->nodes.push_back(start);
+	SMP::root = &(this->nodes.front());
 	goal.set(goalx, goaly);
 
 	SMP::start.set(startx, starty);
@@ -127,6 +128,10 @@ inline void Enviroment::update()
 		car.update();
 
 	}
+	//TODO: Looking at the car pose and its field of view look for obstacles falling in this field of view 
+	//and make the cost to reach for the nodes falling within specified radius as infinity. mark the alive flag for this node as false
+	//Mark each children of each of these nodes(till we reach the leaf node) as 'affected'(a boolean on Nodes class)
+	//and display these children in a different colour. Possibly, check at the time of drawing - if(alive and affected), then-draw in yellow colour
 }
 
 inline void Enviroment::render()
@@ -144,6 +149,7 @@ inline void Enviroment::render()
 	ofNoFill();
 	ofDrawCircle(goal.x, goal.y, converge);
 
+	//TODO: do not draw the nodes 
 	for (auto i : this->nodes)
 	{
 		ofSetColor({ 10,10,10 });

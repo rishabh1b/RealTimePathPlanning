@@ -2,12 +2,15 @@
 #include "RRTstar.h"
 #include "InformedRRTstar.h"
 #include "simulationParam.h"
+#include "RT-RRTstar.h"
 
 bool SMP::goalFound = false;
 bool SMP::moveNow = false;
 ofVec2f SMP::goal;
 ofVec2f SMP::start;
 Nodes* SMP::target = NULL;
+Nodes* SMP::nextTarget = NULL;
+Nodes* SMP::root = NULL;
 
 SMP::SMP()
 {
@@ -124,7 +127,7 @@ void RRTstar::nextIter(std::list<Nodes>& nodes,const list<obstacles> obst, Nodes
 	if (!SMP::checkSample(u, obst)) return;
 
 	std::list<Nodes*> closestNeighbours;
-	closestNeighbours = this->findClosestNeighbours(u, rrtstarradius, nodes);
+	closestNeighbours = RRTstar::findClosestNeighbours(u, nodes);
 	//if (closestNeighbours.empty()) {
 	//	closestNeighbours.push_back(v);
 	//}
@@ -177,13 +180,13 @@ void RRTstar::nextIter(std::list<Nodes>& nodes,const list<obstacles> obst, Nodes
 
 }
 
-std::list<Nodes*> RRTstar::findClosestNeighbours(Nodes u, float radius, std::list<Nodes>& nodes)
+std::list<Nodes*> RRTstar::findClosestNeighbours(Nodes u, std::list<Nodes>& nodes)
 {
 	std::list<Nodes*> closestNeighbours;
 	std::list<Nodes>::iterator it = nodes.begin();
 	while (it != nodes.end())
 	{
-		if (u.location.distance(it->location) < radius)
+		if (u.location.distance(it->location) < rrtstarradius)
 		{
 			closestNeighbours.push_back(&(*it));
 		}
@@ -209,7 +212,7 @@ void InformedRRTstar::nextIter(std::list<Nodes> &nodes, const std::list<obstacle
 			it++;
 		}
 
-		RRTstar::nextIter(nodes, obst, &sample(min_cost));
+		RRTstar::nextIter(nodes, obst, &InformedRRTstar::sample(min_cost));
 	}
 	if (SMP::goalFound)
 		sol_nodes.push_back(&nodes.back());
@@ -245,3 +248,128 @@ Nodes InformedRRTstar::sample(float c_max)
 
 	return n;
 }
+
+void RTRRTstar::nextIter(std::list<Nodes> &nodes, const std::list<obstacles>& obst, Nodes* u_ = NULL)
+{
+	float t = ofGetElapsedTimef();
+	while ((ofGetElapsedTimef() - t) < allowedTimeRewiring)
+		expandAndRewire(nodes, obst);
+	updateNextBestPath();
+	//if car.getPosition() close to x0(root), then-
+	Nodes* nextPoint = *(currPath.begin()++); //Change the DS for path to vector?
+	SMP::root->location.x = nextPoint->location.x;
+	SMP::root->location.y = nextPoint->location.y;
+}
+
+void RTRRTstar::expandAndRewire(std::list<Nodes>& nodes, const std::list<obstacles>& obst)
+{
+	Nodes u = sample(); 
+	Nodes* v = RTRRTstar::getClosestNeighbour(u);
+	double dist = u.location.distance((*v).location);
+
+	if (dist > epsilon)
+	{
+		float x_n = v->location.x + (u.location.x - v->location.x)  * epsilon / dist;
+		float y_n = v->location.y + (u.location.y - v->location.y)  * epsilon / dist;
+		u.location.x = x_n;
+		u.location.y = y_n;
+	}
+	if (!SMP::checkSample(u, obst)) return;
+	if (SMP::checkCollision(u, *v, obst) && this->closestNeighbours.size() < maxNeighbours)
+	{
+		this->addNode(u, v, nodes);
+	}
+	else
+	{
+		this->rewireRand.push_front(v);
+	}
+
+	//if (closestNeighbours.empty()) return;
+
+}
+
+void RTRRTstar::updateNextBestPath()
+{
+	// Will assign pathAvailable variable
+}
+
+Nodes RTRRTstar::sample()
+{
+	float rand_num = ofRandom(0, 1);
+	
+	if (rand_num > 1 - alpha && SMP::target != NULL)
+	{
+		float x = ofRandom(SMP::root->location.x, SMP::target->location.x);
+		float y = ofRandom(SMP::root->location.y, SMP::target->location.y);
+		Nodes new_node;
+		new_node.location.x = x;
+		new_node.location.y = y;
+		return new_node;
+	}
+	else if (rand_num >= (1 - alpha) / beta && pathAvailable)
+	{
+		return InformedRRTstar::sample(cost(SMP::target));
+	}
+	else
+	{
+		return SMP::sampler();
+	}
+
+}
+
+Nodes* RTRRTstar::getClosestNeighbour(Nodes u)
+{
+	//closestNeighbours will be assigned here
+}
+
+void RTRRTstar::addNode(Nodes n, Nodes* closest, std::list<Nodes>& nodes)
+{
+	Nodes* parent = closest;
+	float c_min = cost(closest) + n.location.distance(closest->location);
+	std::list<Nodes*>::iterator it = (this->closestNeighbours).begin();
+	float c_new;
+	while (it != closestNeighbours.end())
+	{
+		c_new = cost(*it) + n.location.distance((*it)->location);
+		if (c_new < c_min)
+		{
+			c_min = c_new;
+			parent = *it;
+			n.costToStart = c_min;
+		}
+	}
+	n.parent = parent;
+	nodes.push_back(n);
+	parent->children.push_back(&(nodes.back()));
+
+	if (SMP::target != NULL && n.location.distance(target->location) < converge)
+	{
+		SMP::goalFound = true;
+	}
+	//TODO: Add the node to the Grid based/KD-Tree Data structure
+
+	this->rewireRand.push_front(&(nodes.back()));
+}
+
+float RTRRTstar::cost(Nodes* node)
+{
+	float cost_ = 0;
+	Nodes* curr = node;
+	while (curr->parent != NULL)
+	{
+		if (curr->parent->costToStart == inf)
+		{
+			node->costToStart = inf;
+			break;
+		}
+		cost_ += curr->location.distance(curr->parent->location);
+		curr = curr->parent;
+	}
+	return cost_;
+}
+
+
+//std::list<Nodes*> RTRRTstar::findNodesNear(Nodes u)
+//{
+//
+//}

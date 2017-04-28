@@ -3,8 +3,8 @@
 class InformedRRTstar : public RRTstar
 {
 public:
-	Nodes sample(float c_max);
+	static Nodes sample(float c_max);
 	void nextIter(std::list<Nodes> &nodes, const std::list<obstacles> obst);
-private:
+protected:
 	std::list<Nodes*> sol_nodes;
 };
