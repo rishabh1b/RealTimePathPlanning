@@ -103,7 +103,7 @@ bool SMP::checkSample(Nodes n, const list<obstacles> obst)
 	return true;
 }
 
-void RRTstar::nextIter(std::list<Nodes>& nodes,const list<obstacles> obst, Nodes* u_)
+void RRTstar::nextIter(std::list<Nodes>& nodes, const list<obstacles> obst, Nodes* u_)
 {
 	Nodes u;
 	if (u_ == NULL)
@@ -231,7 +231,7 @@ Nodes InformedRRTstar::sample(float c_max)
 
 	float x = ofRandom(-1, 1);
 	float y = ofRandom(-1, 1);
-	
+
 	float x2 = x * r1 * std::cos(angle) + y * r2 * std::sin(angle);
 	float y2 = -x * r1 * std::sin(angle) + y * r2 * std::cos(angle);
 
@@ -244,4 +244,127 @@ Nodes InformedRRTstar::sample(float c_max)
 	n.location.y = rot_trans_sample.y;
 
 	return n;
+}
+
+void RTRRTstar::rewireRandomNode(std::list<Nodes> &rewireRand, const list<obstacles> obst, std::list<Nodes> &nodes) {
+
+	std::list<Nodes*>::iterator mainIT = rewireRand.begin();
+
+	while (mainIT != rewireRand.end()) {
+		if (time > 0) {
+			Nodes Xr = rewireRand.pop_front();
+			std::list<Nodes*> closestNeighbours;
+			closestNeighbours = this->findClosestNeighbours(Xr, radius, nodes);
+
+			std::list<Nodes*>::iterator it = closestNeighbours.begin();
+			std::list<Nodes*> safeNeighbours;
+			while (it != closestNeighbours.end())
+			{
+				if (SMP::checkCollision(u, *(*it), obst))
+					safeNeighbours.push_back(*it);
+				it++;
+			}
+			if (safeNeighbours.empty()) return;
+
+			it = safeNeighbours.begin();
+			while (it != safeNeighbours.end()) {
+
+				oldCost = (*it)->costToStart;
+				newCost = Xr.costToStart + Xr.location.distance((*it)->location);
+				if (newCost < oldCost & SMP::checkCollision(Xr, (*it), obst) {
+
+					(*it)->prevParent = (*it)->parent;
+					(*it)->parent = &(rewireRand.back());
+					(*it)->costToStart = newCost;
+					it++
+				}
+			}
+			mainIT++;
+		}
+	}
+}
+
+void RTRRTstar::rewireFromRoot(std::list<Nodes> &rewireRoot, const list<obstacles> obst, std::list<Nodes> &nodes, Nodes X0) {
+
+	if (!rewireRoot.empty()) {
+		rewireRoot.push_back(X0);
+	}
+
+	std::list<Nodes*>::iterator mainIT = rewireRoot.begin();
+	float startTime = ofGetElapsedTimef();
+
+	while (mainIT != rewireRoot.end() || elapsedTime - startTime > 1) {
+
+		Nodes Xs = rewireRoot.pop_front();
+		std::list<Nodes*> closestNeighbours;
+		closestNeighbours = this->findClosestNeighbours(Xs, radius, nodes);
+
+		std::list<Nodes*>::iterator it = closestNeighbours.begin();
+		std::list<Nodes*> safeNeighbours;
+		while (it != closestNeighbours.end())
+		{
+			if (SMP::checkCollision(Xs, *(*it), obst))
+				safeNeighbours.push_back(*it);
+			it++;
+		}
+		if (safeNeighbours.empty()) return;
+
+		it = safeNeighbours.begin();
+		while (it != safeNeighbours.end()) {
+
+			oldCost = (*it)->costToStart;
+			newCost = Xs.costToStart + Xs.location.distance((*it)->location);
+			if (newCost < oldCost & SMP::checkCollision(Xs, (*it), obst) {
+
+				(*it)->prevParent = (*it)->parent;
+				(*it)->parent = &(rewireRoot.back());
+				(*it)->costToStart = newCost;
+				it++
+			}
+			bool found = std::find(rewireRoot.begin(), rewireRoot.end(), (*it)) != rewireRoot.end();
+			if (!found) {
+				rewireRoot.push_back((*it));
+			}
+
+			mainIT++;
+			elapsedTime = ofGetElapsedTimef();
+		}
+	}
+}
+
+float RTRRTstar::getHeuristic(Nodes u, Nodes target) {
+	heuristic = abs(u.location.x - target.location.x) + abs(u.location.y - target.location.y);
+	return heuristic;
+}
+
+std::list<Nodes*> RTRRTstar::updateNextBestPath(std::list<Nodes> &path, Nodes target) {
+
+	std::list<Nodes *>::iterator pathIT = path.begin();
+	Nodes *pathNode = target;
+	if (flagGoalFound) {
+		do
+		{
+			path.push_back(*pathNode);
+			pathNode = pathNode->parent;
+		} while (pathNode->parent != NULL);
+	}
+	else {
+		while (pathIT != path.end()) {
+			std::list<Nodes>::iterator it = (*pathIT).children.begin();
+			Nodes tempNode = pathIT.children.pop_front();
+			float minCost = tempNode.costToStart + getHeuristic(it, target);
+			while (it != pathIT.children.end()) {
+				if (it.costToStart + getHeuristic(it,target) < minCost) {
+					minCost = it.costToStart+ getHeuristic(it,target);
+					tempNode = it;
+				}
+
+			}
+
+			//TODO: Block and Break procedure is remaining. How to block?  
+		}
+
+		return path;
+	}
+
 }
