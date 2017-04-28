@@ -106,6 +106,7 @@ void Robot::updateEnviroment(list<Nodes>& node,obstacles obst)
 			it->costToStart = inf;
 			it->alive = false;
 		}
+		it++;
 	}
 }
 
