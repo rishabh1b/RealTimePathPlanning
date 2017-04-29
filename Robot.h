@@ -3,13 +3,14 @@
 #pragma once
 #include"simulationParam.h"
 #include"nodeStruct.h"
+#include"obstacle.h"
 class Robot
 {
 public:
 	//--------------------------------------------------------------Function
 	// Default constructor  
 	Robot() { setup(); }
-	//Robot(ofVec2f loc) { setup(loc);}
+	Robot(ofVec2f loc) { setup(loc);}
 	// Default destructor  
 	~Robot() {};
 	void setup();
@@ -38,6 +39,8 @@ public:
 	ofVec2f getLocation() { return location; }
 	//Return Color of quadCopter
 	ofColor getColor() { return color; }
+	void fillEnviroment(const list<obstacles> obst,list<Nodes> &node);
+	void updateEnviroment(list<Nodes> &node, obstacles obst);
 	//--------------------------------------------------------------Variables
 private:
 	bool alive;

@@ -22,11 +22,11 @@ obstacles::~obstacles()
 
 void obstacles::move()
 {
-	float stepsize = ofRandom(0, 10);
-	float stepx = ofRandom(-stepsize, stepsize);
-	float stepy = ofRandom(-stepsize, stepsize);
-	location.x += stepx;
-	location.y += stepy;
+	//float stepsize = ofRandom(0, 10);
+	//float stepx = ofRandom(-stepsize, stepsize);
+	//float stepy = ofRandom(-stepsize, stepsize);
+	//location.x += stepx;
+	//location.y += stepy;
 }
 
 
@@ -39,4 +39,92 @@ void obstacles::render()
 	ofDrawCircle(location.x, location.y, radius);
 	ofNoFill();
 	ofDisableAlphaBlending();
+}
+
+movingObst::movingObst()
+{
+	float x = ofRandom(0, ofGetWindowWidth());
+	float y = ofRandom(0, ofGetWindowHeight());
+	location.set(x, y);
+	maxVal = obstMaxVelocity;
+#ifdef automatic
+	velocity.set(maxVal, maxVal);
+#endif // automatic
+	radius = 30;
+	color = { 200,100,20 };
+}
+
+movingObst::~movingObst()
+{
+}
+
+void movingObst::render()
+{
+	ofEnableAlphaBlending();
+	ofSetColor(color);
+	ofFill();
+	ofDrawCircle(location.x, location.y, radius);
+	ofNoFill();
+	ofDisableAlphaBlending();
+}
+#ifdef manual
+void movingObst::move(char key)
+{
+	if (key == 'w')
+	{
+		location.y -= maxVal;
+	}
+	else if (key == 's')
+	{
+		location.y += maxVal;
+	}
+	if (key == 'a')
+	{
+		location.x -= maxVal;
+	}
+	else if (key == 'd')
+	{
+		location.x += maxVal;
+	}
+}
+#endif // 
+#ifdef automatic
+void movingObst::move()
+{
+	if (location.y+radius >= ofGetHeight() || location.y- radius <= 0) {
+		velocity.y = velocity.y*-1;
+	}
+	if (location.x- radius <= 0 || location.x+ radius >= ofGetWidth()) {
+		velocity.x = velocity.x*-1;
+	}
+
+	location += velocity;
+}
+#endif // automatic
+
+maze::maze(ofVec2f loc)
+{
+	location = loc;
+	color = { 10,10,50 };
+	height = 0.40*ofGetHeight();
+	width = 20;
+}
+
+maze::~maze()
+{
+}
+
+void maze::render()
+{
+	ofEnableAlphaBlending();
+	ofSetColor(color);
+	ofFill();
+	ofRect(location.x, location.y, width, height);
+	ofNoFill();
+	ofDisableAlphaBlending();
+}
+
+void maze::move()
+{
+
 }

@@ -9,5 +9,4 @@ int main( ){
 	// can be OF_WINDOW or OF_FULLSCREEN
 	// pass in width and height too:
 	ofRunApp(new ofApp());
-
 }

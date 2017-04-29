@@ -13,25 +13,30 @@ class Enviroment
 public:
 	//--------------------------------------------------------------Function
 	// Default constructor  
-	Enviroment() {};
+	Enviroment() { setup(); };
+	Enviroment(ofVec2f _start) { setup(_start); };
 	// Default destructor  
 	~Enviroment() {};
 	// Setup method
 	void setup();
+	void setup(ofVec2f _start);
+	void update(Robot * car, list<obstacles*> obst);
+	void targetSet(ofVec2f loc);
 	// Update method
-	void update();
+	void update(Robot *car);
 	// Render method draw nodes in enviroment.
 	void render();
 
 	void renderGrid();
 	//--------------------------------------------------------------Variables
 	bool grid = false;
+	bool goalin = false;
 private:
 	//--------------------------------------------------------------Variables
 protected:
 	//--------------------------------------------------------------Variables
 	std::list<Nodes> nodes;
-	std::list<obstacles> obst;
+	//std::list<obstacles> obst;
 	std::list<Nodes> path;
 	RRTstar rrtstar;
 	InformedRRTstar irrtstar;
@@ -40,10 +45,8 @@ protected:
 	bool vechicle = false;
 
 	ofVec2f goal;
-
-
 	ofVec2f home;
-	Robot car;
+	//Robot *car;
 
 	// A list or an array of Obstacles should come here
 
@@ -52,24 +55,44 @@ protected:
 inline void Enviroment::setup()
 {
 	home.set(startx, starty);
-	car.setup(home);
+	/*car = new Robot(home);*/
 
-	for (unsigned int i = 0; i < numberOfobst; i++)
-	{
-		obstacles ob;
-		obst.push_back(ob);
-	}
+	//for (unsigned int i = 0; i < numberOfobst; i++)
+	//{
+	//	obstacles ob;
+	//	obst.push_back(ob);
+	//}
 
 	Nodes start(startx, starty, 0);
 	this->nodes.push_back(start);
-	goal.set(goalx, goaly);
-
+	//goal.set(goalx, goaly);
 	SMP::start.set(startx, starty);
-	SMP::goal = goal;
+	//SMP::goal = goal;
 	SMP::goalFound = false;
 }
 
-inline void Enviroment::update()
+
+inline void Enviroment::setup(ofVec2f _start)
+{
+	home = _start;
+	//car = new Robot(home);
+
+	//for (unsigned int i = 0; i < numberOfobst; i++)
+	//{
+	//	obstacles ob;
+	//	obst.push_back(ob);
+	//}
+
+	Nodes start(home.x, home.y, 0);
+	this->nodes.push_back(start);
+	//goal = _goal;
+
+	SMP::start.set(startx, starty);
+	//SMP::goal = goal;
+	SMP::goalFound = false;
+}
+
+inline void Enviroment::update(Robot *car,list<obstacles*> obst)
 {
 	/*std::list<obstacles>::iterator itobs = obst.begin();
 	while (itobs != obst.end()) {
@@ -116,34 +139,42 @@ inline void Enviroment::update()
 
 		while(pathIt !=path.end()){
 			if (pathIt->alive) {
-				car.controller(pathIt->location);
-				float dist= pathIt->location.distance(car.getLocation());
+				car->controller(pathIt->location);
+				float dist= pathIt->location.distance(car->getLocation());
 				if (dist < 2.0) pathIt->alive = false;
 				break;
 			}
 			pathIt++;
 		}
 		if(pathIt!=path.end())
-		car.update();
+		car->update();
 
 	}
+}
+
+inline void Enviroment::targetSet(ofVec2f loc)
+{
+	goal = loc;
+	SMP::goal = goal;
+	goalin = true;
 }
 
 inline void Enviroment::render()
 {
 	ofEnableAlphaBlending();
-	for (auto i : obst) {
-		i.render();
-		//cout << i.getX() << "  " << i.getY() << endl;
-	}
+	//for (auto i : obst) {
+	//	i.render();
+	//	//cout << i.getX() << "  " << i.getY() << endl;
+	//}
 
 
 	ofSetColor({255, 255, 10});
-	ofFill();
-	ofDrawCircle(goal.x, goal.y, NODE_RADIUS);
-	ofNoFill();
-	ofDrawCircle(goal.x, goal.y, converge);
-
+	if (goalin) {
+		ofFill();
+		ofDrawCircle(goal.x, goal.y, NODE_RADIUS);
+		ofNoFill();
+		ofDrawCircle(goal.x, goal.y, converge);
+	}
 	for (auto i : this->nodes)
 	{
 		ofSetColor({ 10,10,10 });
@@ -180,7 +211,6 @@ inline void Enviroment::render()
 		}
 		ofSetLineWidth(1);
 	}
-	car.render();
 	ofDisableAlphaBlending();
 }
 

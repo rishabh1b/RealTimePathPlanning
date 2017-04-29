@@ -10,8 +10,8 @@ public:
 	static void addNode(Nodes n, std::list<Nodes>& nodes);
 	static Nodes* nearestNode(Nodes n, std::list<Nodes>& nodes);
 	static Nodes* nearestNode(Nodes n, std::list<Nodes*>& nodes);
-	static bool checkCollision(Nodes n1, Nodes n2, const list<obstacles> obst);
-	static bool checkSample(Nodes n, const list<obstacles> obst);
+	static bool checkCollision(Nodes n1, Nodes n2, list<obstacles*> obst);
+	static bool checkSample(Nodes n, list<obstacles*> obst);
 	static Nodes sampler();
 	static bool goalFound;
 	static bool moveNow;
