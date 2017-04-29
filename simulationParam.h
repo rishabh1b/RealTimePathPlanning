@@ -1,5 +1,6 @@
 #pragma once
 #include "ofMain.h"
+
 #include <limits>
 //#define randomSeed 5
 //#define CLK
@@ -27,5 +28,10 @@ const float inf = std::numeric_limits<float>::infinity();
 #define goalx 250
 #define goaly 200
 #define converge 50.0
-#define epsilon 10
-#define rrtstarradius 15
+#define epsilon 20
+#define rrtstarradius 25
+#define allowedTimeRewiring 0.5
+#define maxNeighbours 10
+#define minDistClosestNode 5
+#define alpha 0.1
+#define beta 1.4
