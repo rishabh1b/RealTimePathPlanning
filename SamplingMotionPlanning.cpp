@@ -145,9 +145,7 @@ void RRTstar::nextIter(std::list<Nodes>& nodes, const list<obstacles> obst, Node
 
 	std::list<Nodes*> closestNeighbours;
 	closestNeighbours = RRTstar::findClosestNeighbours(u, nodes);
-	//if (closestNeighbours.empty()) {
-	//	closestNeighbours.push_back(v);
-	//}
+
 	if (closestNeighbours.empty()) return;
 
 	std::list<Nodes*>::iterator it = closestNeighbours.begin();
@@ -201,6 +199,11 @@ std::list<Nodes*> RRTstar::findClosestNeighbours(Nodes u, std::list<Nodes>& node
 {
 	std::list<Nodes*> closestNeighbours;
 	std::list<Nodes>::iterator it = nodes.begin();
+
+	/*float rrtstarradius = std::sqrt((ofGetWindowWidth() * ofGetWindowHeight() * maxNeighbours) / (3.146 * nodes.size()));
+	if (rrtstarradius < minDistClosestNode)
+		rrtstarradius = minDistClosestNode;*/
+
 	while (it != nodes.end())
 	{
 		if (u.location.distance(it->location) < rrtstarradius)
@@ -271,10 +274,16 @@ void RTRRTstar::nextIter(std::list<Nodes> &nodes, const std::list<obstacles>& ob
 	timeKeeper = ofGetElapsedTimef();
 	expandAndRewire(nodes, obst);
 	updateNextBestPath();
-	//if car.getPosition() close to x0(root), then-
-	Nodes* nextPoint = *(currPath.begin()++); //Change the DS for path to vector?
-	SMP::root->location.x = nextPoint->location.x;
-	SMP::root->location.y = nextPoint->location.y;
+	if (currPath.size() > 1) //TODO:  Add this condition too  - car.getPosition() close to x0(root)
+	{
+		Nodes* nextPoint = *(currPath.begin()++); //Change the DS for path to vector?
+		SMP::root->location.x = nextPoint->location.x;
+		SMP::root->location.y = nextPoint->location.y;
+
+		currPath.clear();
+		currPath.push_back(SMP::root);
+	}
+	//SMP::moveNow = true; //might not be needed
 }
 
 void RTRRTstar::expandAndRewire(std::list<Nodes>& nodes, const std::list<obstacles>& obst)
@@ -290,16 +299,17 @@ void RTRRTstar::expandAndRewire(std::list<Nodes>& nodes, const std::list<obstacl
 		u.location.x = x_n;
 		u.location.y = y_n;
 	}
+
 	if (!SMP::checkSample(u, obst)) return;
 	if (SMP::checkCollision(u, *v, obst))
 	{
-		if (this->closestNeighbours.size() < maxNeighbours)
+		if (this->closestNeighbours.size() < maxNeighbours)// || u.location.distance(v->location) > minDistClosestNode)
 		{
 			this->addNode(u, v, nodes, obst);
 		}
 		else
 		{
-			this->rewireRand.push(v);
+			this->rewireRand.push_front(v);
 		}
 		rewireRandomNode(obst, nodes);
 	}
@@ -308,7 +318,7 @@ void RTRRTstar::expandAndRewire(std::list<Nodes>& nodes, const std::list<obstacl
 
 void RTRRTstar::updateNextBestPath()
 {
-	// Will assign pathAvailable variable
+	std::list<Nodes*> updatedPath;
 	Nodes *pathNode = target;
 	if (SMP::goalFound) {
 		do
@@ -316,13 +326,13 @@ void RTRRTstar::updateNextBestPath()
 			currPath.push_back(pathNode);
 			pathNode = pathNode->parent;
 		} while (pathNode->parent != NULL);
+		currPath.reverse();
+		return;
 	}
 	else {
 		Nodes* curr_node = SMP::root;
-		while (1)
+		while (!curr_node->children.empty())
 		{
-			//std::list<Nodes*>::iterator pathIT = currPath.begin();
-			//std::list<Nodes*> updatedPath;
 			std::list<Nodes*>::iterator it = curr_node->children.begin();
 			Nodes* tempNode = curr_node->children.front();
 			float cost_ = cost(tempNode);
@@ -335,7 +345,7 @@ void RTRRTstar::updateNextBestPath()
 					tempNode = *it;
 				}
 			}
-			currPath.push_back(tempNode);
+			updatedPath.push_back(tempNode);
 			if (tempNode->children.empty() || cost(tempNode) == inf)
 			{
 				visited_set.insert(tempNode);
@@ -344,6 +354,8 @@ void RTRRTstar::updateNextBestPath()
 			curr_node = tempNode;
 		}
 	}
+	if (updatedPath.back()->location.distance(SMP::target->location) < currPath.back()->location.distance(SMP::target->location))
+		currPath = updatedPath;
 }
 
 Nodes RTRRTstar::sample()
@@ -359,7 +371,7 @@ Nodes RTRRTstar::sample()
 		new_node.location.y = y;
 		return new_node;
 	}
-	else if (rand_num >= (1 - alpha) / beta && pathAvailable)
+	else if (rand_num >= (1 - alpha) / beta && SMP::goalFound)
 	{
 		return InformedRRTstar::sample(cost(SMP::target));
 	}
@@ -375,6 +387,11 @@ Nodes* RTRRTstar::getClosestNeighbour(Nodes u, std::list<Nodes>& nodes) //Using 
 	double min_dist = u.location.squareDistance(nodes.front().location);
 	Nodes* near_node = &(nodes.front());
 	std::list<Nodes>::iterator it = nodes.begin();
+
+	/*float rrtstarradius = std::sqrt((ofGetWindowWidth() * ofGetWindowHeight() * maxNeighbours) / (3.146 * nodes.size()));
+	if (rrtstarradius < minDistClosestNode)
+		rrtstarradius = minDistClosestNode;*/
+
 	while (it != nodes.end())
 	{
 		float dist = u.location.squareDistance((*it).location);
@@ -383,7 +400,7 @@ Nodes* RTRRTstar::getClosestNeighbour(Nodes u, std::list<Nodes>& nodes) //Using 
 			min_dist = dist;
 			near_node = &(*it);
 		}
-		if (u.location.distance(it->location) < rrtstarradius) //TODO:Change this constant value
+		if (u.location.distance(it->location) < rrtstarradius) 
 		{
 			closestNeighbours.push_back(&(*it));
 		}
@@ -418,11 +435,12 @@ void RTRRTstar::addNode(Nodes n, Nodes* closest, std::list<Nodes>& nodes, const 
 	}
 	//TODO: Add the node to the Grid based/KD-Tree Data structure
 
-	this->rewireRand.push(&(nodes.back()));
+	this->rewireRand.push_front(&(nodes.back()));
 }
 
 float RTRRTstar::cost(Nodes* node)
 {
+	bool badNode = false;
 	float cost_ = 0;
 	Nodes* curr = node;
 	while (curr->parent != NULL)
@@ -430,27 +448,27 @@ float RTRRTstar::cost(Nodes* node)
 		if (curr->parent->costToStart == inf)
 		{
 			node->costToStart = inf;
+			badNode = true;
 			break;
 		}
 		cost_ += curr->location.distance(curr->parent->location);
 		curr = curr->parent;
 	}
-	return cost_;
+	if (badNode)
+		return inf;
+	else
+	{
+		node->costToStart = cost_;
+		return cost_;
+	}
 }
-
-
-//std::list<Nodes*> RTRRTstar::findNodesNear(Nodes u)
-//{
-//
-//}
 
 void RTRRTstar::rewireRandomNode(const list<obstacles> obst, std::list<Nodes> &nodes)
 {
-	//std::list<Nodes*>::iterator mainIT = rewireRand.begin();
-	while (!rewireRand.empty() && (ofGetElapsedTimef() - timeKeeper) < allowedTimeRewiring)
+	while (!rewireRand.empty() && (ofGetElapsedTimef() - timeKeeper) < 0.5 * allowedTimeRewiring)
 	{
 		Nodes* Xr = rewireRand.front();
-		rewireRand.pop();
+		rewireRand.pop_front();
 
 		std::list<Nodes*> nearNodes = RRTstar::findClosestNeighbours(*Xr, nodes);
 		std::list<Nodes*>::iterator it = nearNodes.begin();
@@ -461,14 +479,15 @@ void RTRRTstar::rewireRandomNode(const list<obstacles> obst, std::list<Nodes> &n
 				safeNeighbours.push_back(*it);
 			it++;
 		}
-		if (safeNeighbours.empty()) return;
+		if (safeNeighbours.empty()) continue;
 
 		it = safeNeighbours.begin();
+		float cost_ = cost(Xr);
 		while (it != safeNeighbours.end())
 		{
 
 			float oldCost = cost(*it);
-			float newCost = cost(Xr) + Xr->location.distance((*it)->location);
+			float newCost = cost_ + Xr->location.distance((*it)->location);
 			if (newCost < oldCost)
 			{
 
@@ -478,7 +497,7 @@ void RTRRTstar::rewireRandomNode(const list<obstacles> obst, std::list<Nodes> &n
 				(*it)->costToStart = newCost;
 				Xr->children.push_back(*it);
 				it++;
-				rewireRand.push(*it);
+				rewireRand.push_back(*it);
 			}
 		}
 	}
@@ -505,7 +524,7 @@ void RTRRTstar::rewireFromRoot(const list<obstacles> obst, std::list<Nodes> &nod
 				safeNeighbours.push_back(*it);
 			it++;
 		}
-		if (safeNeighbours.empty()) return;
+		if (safeNeighbours.empty()) continue;
 
 		it = safeNeighbours.begin();
 		while (it != safeNeighbours.end()) {
@@ -522,6 +541,7 @@ void RTRRTstar::rewireFromRoot(const list<obstacles> obst, std::list<Nodes> &nod
 				it++;
 			}
 
+			//TODO: take care of restarting the queue part
 			bool found = std::find(rewireRoot.begin(), rewireRoot.end(), (*it)) != rewireRoot.end();
 			if (!found) {
 				rewireRoot.push_back((*it));
@@ -537,6 +557,7 @@ float RTRRTstar::getHeuristic(Nodes* u) {
 		return u->location.distance(SMP::target->location);
 }
 
+//method not used
 bool RTRRTstar::isPathToGoalAvailable()
 {
 	if (!SMP::goalFound)

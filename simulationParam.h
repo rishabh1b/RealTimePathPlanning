@@ -24,7 +24,7 @@
 #define converge 50.0
 #define epsilon 20
 #define rrtstarradius 25
-#define allowedTimeRewiring 1
+#define allowedTimeRewiring 0.5
 #define maxNeighbours 10
 #define minDistClosestNode 5
 const float inf = numeric_limits<float>::infinity();

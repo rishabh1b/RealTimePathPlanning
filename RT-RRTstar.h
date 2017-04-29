@@ -14,6 +14,7 @@ class RTRRTstar : public InformedRRTstar
 {
 	void nextIter(std::list<Nodes> &nodes, const std::list<obstacles>& obst, Nodes* u_ = NULL);
 	static std::set<Nodes*, nodes_compare> visited_set;
+	std::list<Nodes*> currPath;
 private:
 	void expandAndRewire(std::list<Nodes>& nodes, const std::list<obstacles>& obst);
 	void updateNextBestPath();
@@ -27,13 +28,12 @@ private:
 	bool isPathToGoalAvailable();
 	//std::list<Nodes*> RTRRTstar::findNodesNear(Nodes u);
 
-	std::list<Nodes*> currPath;
-	std::queue<Nodes*> rewireRand;
+	std::list<Nodes*> rewireRand;
 	std::list<Nodes*> rewireRoot;
 	std::list<Nodes*> closestNeighbours;
 
 	float timeKeeper;
-	bool pathAvailable;
+	//bool pathAvailable;
 	// Add a grid based indexing DS for nodes
 };
 
