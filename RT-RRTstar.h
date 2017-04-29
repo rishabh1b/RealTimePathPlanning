@@ -12,17 +12,17 @@ struct nodes_compare {
 
 class RTRRTstar : public InformedRRTstar
 {
-	void nextIter(std::list<Nodes> &nodes, const std::list<obstacles>& obst, Nodes* u_ = NULL);
+	void nextIter(std::list<Nodes> &nodes, const std::list<obstacles*>& obst, Nodes* u_ = NULL);
 	static std::set<Nodes*, nodes_compare> visited_set;
 	std::list<Nodes*> currPath;
 private:
-	void expandAndRewire(std::list<Nodes>& nodes, const std::list<obstacles>& obst);
+	void expandAndRewire(std::list<Nodes>& nodes, const std::list<obstacles*>& obst);
 	void updateNextBestPath();
 	Nodes sample();
 	Nodes* getClosestNeighbour(Nodes u, std::list<Nodes>& nodes);
-	void addNode(Nodes n, Nodes* closest, std::list<Nodes>& nodes, const std::list<obstacles>& obst);
-	void rewireRandomNode(const list<obstacles> obst, std::list<Nodes> &nodes);
-	void rewireFromRoot(const list<obstacles> obst, std::list<Nodes> &nodes);
+	void addNode(Nodes n, Nodes* closest, std::list<Nodes>& nodes, const std::list<obstacles*>& obst);
+	void rewireRandomNode(const list<obstacles*> &obst, std::list<Nodes> &nodes);
+	void rewireFromRoot(const list<obstacles*> &obst, std::list<Nodes> &nodes);
 	float cost(Nodes* node);
 	float getHeuristic(Nodes* u);
 	bool isPathToGoalAvailable();
