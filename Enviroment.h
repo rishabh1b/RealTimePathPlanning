@@ -80,10 +80,11 @@ inline void Enviroment::update(Robot *car,list<obstacles*> obst)
 {
 	//rrtstar.nextIter(nodes, obst);
 	//Following part is for Informed RRT*
-	//irrtstar.nextIter(nodes, obst);
+	irrtstar.nextIter(nodes, obst);
+	car->fillEnviroment(obst, nodes);
 	//InformedRRTstar::usingInformedRRTstar = true;
 
-	rtrrtstar.nextIter(nodes, obst, car);
+	//rtrrtstar.nextIter(nodes, obst, car);
 
 	if (SMP::sampledInGoalRegion)
 		SMP::sampledInGoalRegion = false;
@@ -146,7 +147,9 @@ inline void Enviroment::render()
 	{
 		ofSetColor({ 10,10,10 });
 
-		if (i.parent != NULL && i.prevParent == NULL) {
+		if (i.costToStart == inf) ofSetColor({ 255,0,0 });
+
+		if (i.parent != NULL) {
 			ofPoint pt;ofPolyline line;
 			pt.set(i.location.x, i.location.y);line.addVertex(pt);
 			pt.set(i.parent->location.x, i.parent->location.y);line.addVertex(pt);
