@@ -2,6 +2,7 @@
 #include "nodeStruct.h"
 #include "ofMain.h"
 #include "obstacle.h"
+#include<set>
 
 class SMP
 {

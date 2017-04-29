@@ -11,6 +11,7 @@ ofVec2f SMP::start;
 Nodes* SMP::target = NULL;
 Nodes* SMP::nextTarget = NULL;
 Nodes* SMP::root = NULL;
+std::set<Nodes*, nodes_compare> RTRRTstar::visited_set;
 
 SMP::SMP()
 {
@@ -106,7 +107,7 @@ bool SMP::checkSample(Nodes n, const list<obstacles> obst)
 	return true;
 }
 
-void RRTstar::nextIter(std::list<Nodes>& nodes,const list<obstacles> obst, Nodes* u_)
+void RRTstar::nextIter(std::list<Nodes>& nodes, const list<obstacles> obst, Nodes* u_)
 {
 	Nodes u;
 	if (u_ == NULL)
@@ -234,7 +235,7 @@ Nodes InformedRRTstar::sample(float c_max)
 
 	float x = ofRandom(-1, 1);
 	float y = ofRandom(-1, 1);
-	
+
 	float x2 = x * r1 * std::cos(angle) + y * r2 * std::sin(angle);
 	float y2 = -x * r1 * std::sin(angle) + y * r2 * std::cos(angle);
 
@@ -249,11 +250,10 @@ Nodes InformedRRTstar::sample(float c_max)
 	return n;
 }
 
-void RTRRTstar::nextIter(std::list<Nodes> &nodes, const std::list<obstacles>& obst, Nodes* u_ = NULL)
+void RTRRTstar::nextIter(std::list<Nodes> &nodes, const std::list<obstacles>& obst, Nodes* u_)
 {
-	float t = ofGetElapsedTimef();
-	while ((ofGetElapsedTimef() - t) < allowedTimeRewiring)
-		expandAndRewire(nodes, obst);
+	timeKeeper = ofGetElapsedTimef();
+	expandAndRewire(nodes, obst);
 	updateNextBestPath();
 	//if car.getPosition() close to x0(root), then-
 	Nodes* nextPoint = *(currPath.begin()++); //Change the DS for path to vector?
@@ -263,8 +263,8 @@ void RTRRTstar::nextIter(std::list<Nodes> &nodes, const std::list<obstacles>& ob
 
 void RTRRTstar::expandAndRewire(std::list<Nodes>& nodes, const std::list<obstacles>& obst)
 {
-	Nodes u = sample(); 
-	Nodes* v = RTRRTstar::getClosestNeighbour(u);
+	Nodes u = sample();
+	Nodes* v = RTRRTstar::getClosestNeighbour(u, nodes);
 	double dist = u.location.distance((*v).location);
 
 	if (dist > epsilon)
@@ -275,28 +275,65 @@ void RTRRTstar::expandAndRewire(std::list<Nodes>& nodes, const std::list<obstacl
 		u.location.y = y_n;
 	}
 	if (!SMP::checkSample(u, obst)) return;
-	if (SMP::checkCollision(u, *v, obst) && this->closestNeighbours.size() < maxNeighbours)
+	if (SMP::checkCollision(u, *v, obst))
 	{
-		this->addNode(u, v, nodes);
+		if (this->closestNeighbours.size() < maxNeighbours)
+		{
+			this->addNode(u, v, nodes, obst);
+		}
+		else
+		{
+			this->rewireRand.push(v);
+		}
+		rewireRandomNode(obst, nodes);
 	}
-	else
-	{
-		this->rewireRand.push_front(v);
-	}
-
-	//if (closestNeighbours.empty()) return;
-
+	rewireFromRoot(obst, nodes);
 }
 
 void RTRRTstar::updateNextBestPath()
 {
 	// Will assign pathAvailable variable
+	Nodes *pathNode = target;
+	if (SMP::goalFound) {
+		do
+		{
+			currPath.push_back(pathNode);
+			pathNode = pathNode->parent;
+		} while (pathNode->parent != NULL);
+	}
+	else {
+		Nodes* curr_node = SMP::root;
+		while (1)
+		{
+			//std::list<Nodes*>::iterator pathIT = currPath.begin();
+			//std::list<Nodes*> updatedPath;
+			std::list<Nodes*>::iterator it = curr_node->children.begin();
+			Nodes* tempNode = curr_node->children.front();
+			float cost_ = cost(tempNode);
+			float minCost = cost_ + getHeuristic(*it);
+			while (it != curr_node->children.end()) {
+				cost_ = cost(*it);
+				float cost_new = cost_ + getHeuristic(*it);
+				if (cost_new < minCost) {
+					minCost = cost_new;
+					tempNode = *it;
+				}
+			}
+			currPath.push_back(tempNode);
+			if (tempNode->children.empty() || cost(tempNode) == inf)
+			{
+				visited_set.insert(tempNode);
+				break;
+			}
+			curr_node = tempNode;
+		} 
+	}
 }
 
 Nodes RTRRTstar::sample()
 {
 	float rand_num = ofRandom(0, 1);
-	
+
 	if (rand_num > 1 - alpha && SMP::target != NULL)
 	{
 		float x = ofRandom(SMP::root->location.x, SMP::target->location.x);
@@ -317,12 +354,29 @@ Nodes RTRRTstar::sample()
 
 }
 
-Nodes* RTRRTstar::getClosestNeighbour(Nodes u)
+Nodes* RTRRTstar::getClosestNeighbour(Nodes u, std::list<Nodes>& nodes) //Using all the nodes for the time being
 {
-	//closestNeighbours will be assigned here
+	double min_dist = u.location.squareDistance(nodes.front().location);
+	Nodes* near_node = &(nodes.front());
+	std::list<Nodes>::iterator it = nodes.begin();
+	while (it != nodes.end())
+	{
+		float dist = u.location.squareDistance((*it).location);
+		if (dist < min_dist)
+		{
+			min_dist = dist;
+			near_node = &(*it);
+		}
+		if (u.location.distance(it->location) < rrtstarradius) //TODO:Change this constant value
+		{
+			closestNeighbours.push_back(&(*it));
+		}
+		it++;
+	}
+	return near_node;
 }
 
-void RTRRTstar::addNode(Nodes n, Nodes* closest, std::list<Nodes>& nodes)
+void RTRRTstar::addNode(Nodes n, Nodes* closest, std::list<Nodes>& nodes, const std::list<obstacles>& obst)
 {
 	Nodes* parent = closest;
 	float c_min = cost(closest) + n.location.distance(closest->location);
@@ -331,7 +385,7 @@ void RTRRTstar::addNode(Nodes n, Nodes* closest, std::list<Nodes>& nodes)
 	while (it != closestNeighbours.end())
 	{
 		c_new = cost(*it) + n.location.distance((*it)->location);
-		if (c_new < c_min)
+		if (c_new < c_min && SMP::checkCollision(n, *(*it), obst))
 		{
 			c_min = c_new;
 			parent = *it;
@@ -348,7 +402,7 @@ void RTRRTstar::addNode(Nodes n, Nodes* closest, std::list<Nodes>& nodes)
 	}
 	//TODO: Add the node to the Grid based/KD-Tree Data structure
 
-	this->rewireRand.push_front(&(nodes.back()));
+	this->rewireRand.push(&(nodes.back()));
 }
 
 float RTRRTstar::cost(Nodes* node)
@@ -373,3 +427,116 @@ float RTRRTstar::cost(Nodes* node)
 //{
 //
 //}
+
+void RTRRTstar::rewireRandomNode(const list<obstacles> obst, std::list<Nodes> &nodes)
+{
+	//std::list<Nodes*>::iterator mainIT = rewireRand.begin();
+	while (!rewireRand.empty() && (ofGetElapsedTimef() - timeKeeper) < allowedTimeRewiring)
+	{
+		Nodes* Xr = rewireRand.front();
+		rewireRand.pop();
+
+		std::list<Nodes*> nearNodes = RRTstar::findClosestNeighbours(*Xr, nodes);
+		std::list<Nodes*>::iterator it = nearNodes.begin();
+		std::list<Nodes*> safeNeighbours;
+		while (it != nearNodes.end())
+		{
+			if (SMP::checkCollision(*Xr, *(*it), obst))
+				safeNeighbours.push_back(*it);
+			it++;
+		}
+		if (safeNeighbours.empty()) return;
+
+		it = safeNeighbours.begin();
+		while (it != safeNeighbours.end())
+		{
+
+			float oldCost = cost(*it);
+			float newCost = cost(Xr) + Xr->location.distance((*it)->location);
+			if (newCost < oldCost)
+			{
+
+				(*it)->prevParent = (*it)->parent;
+				(*it)->parent->children.remove(*it);
+				(*it)->parent = Xr;
+				(*it)->costToStart = newCost;
+				Xr->children.push_back(*it);
+				it++;
+				rewireRand.push(*it);
+			}
+		}
+	}
+}
+
+void RTRRTstar::rewireFromRoot(const list<obstacles> obst, std::list<Nodes> &nodes) {
+
+	if (rewireRoot.empty()) {
+		rewireRoot.push_back(SMP::root);
+	}
+
+	while (!rewireRoot.empty() || (ofGetElapsedTimef() - timeKeeper) < allowedTimeRewiring) {
+
+		Nodes* Xs = rewireRoot.front();
+		rewireRoot.pop_front();
+		std::list<Nodes*> nearNeighbours;
+		nearNeighbours = RRTstar::findClosestNeighbours(*Xs, nodes);
+
+		std::list<Nodes*>::iterator it = nearNeighbours.begin();
+		std::list<Nodes*> safeNeighbours;
+		while (it != nearNeighbours.end())
+		{
+			if (SMP::checkCollision(*Xs, *(*it), obst))
+				safeNeighbours.push_back(*it);
+			it++;
+		}
+		if (safeNeighbours.empty()) return;
+
+		it = safeNeighbours.begin();
+		while (it != safeNeighbours.end()) {
+
+			float oldCost = cost(*it);
+			float newCost = cost(Xs) + Xs->location.distance((*it)->location);
+			if (newCost < oldCost) {
+
+				(*it)->prevParent = (*it)->parent;
+				(*it)->parent->children.remove(*it);
+				(*it)->parent = Xs;
+				(*it)->costToStart = newCost;
+				Xs->children.push_back(*it);
+				it++;
+			}
+
+			bool found = std::find(rewireRoot.begin(), rewireRoot.end(), (*it)) != rewireRoot.end();
+			if (!found) {
+				rewireRoot.push_back((*it));
+			}
+		}
+	}
+}
+
+float RTRRTstar::getHeuristic(Nodes* u) {
+	if (visited_set.find(u) != visited_set.end())
+		return inf;
+	else
+		return u->location.distance(SMP::target->location);
+}
+
+bool RTRRTstar::isPathToGoalAvailable()
+{
+	if (!SMP::goalFound)
+		return false;
+
+	std::list<Nodes*> tempPath = currPath;
+	tempPath.reverse();
+	Nodes* curr = tempPath.front();
+	while (curr->parent != NULL)
+	{
+		if (curr->parent->costToStart == inf)
+		{
+			return false;
+		}
+		curr = curr->parent;
+	}
+	return true;
+}
+

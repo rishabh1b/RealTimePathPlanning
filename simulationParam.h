@@ -2,7 +2,7 @@
 #include "ofMain.h"
 #include <limits.h>
 
-int max_val = numeric_limits<int>::max();
+//float max_val = numeric_limits<float>::infinity();
 //#define randomSeed 5
 //#define CLK
 //--------------------------------------------------------------Macros
@@ -27,6 +27,6 @@ int max_val = numeric_limits<int>::max();
 #define allowedTimeRewiring 1
 #define maxNeighbours 10
 #define minDistClosestNode 5
-#define inf max_val
+const float inf = numeric_limits<float>::infinity();
 #define alpha 0.1
 #define beta 1.4
