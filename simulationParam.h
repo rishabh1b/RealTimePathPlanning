@@ -17,7 +17,7 @@ const float inf = std::numeric_limits<float>::infinity();
 //--------------------------------------------------------------Enviroment.h
 #define NODE_RADIUS 3
 //--------------------------------------------------------------Robot.h
-#define sensorRadius 35
+#define sensorRadius 100
 #define mVal 4
 #define mForce 1
 #define accur 1.0

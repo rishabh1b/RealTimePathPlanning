@@ -56,6 +56,8 @@ void Robot::render()
 	ofVertex(r, r * 2);
 	ofEndShape(true);
 	ofPopMatrix();
+	ofSetColor(color, 80);
+	ofDrawCircle(location.x, location.y, ofGetFrameNum() % int(scanRadius));
 	ofNoFill();
 	ofDisableAlphaBlending();
 }
