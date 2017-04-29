@@ -85,12 +85,28 @@ Nodes SMP::sampler()
 
 bool SMP::checkCollision(Nodes n1, Nodes n2, const list<obstacles> obst)
 {
-	ofVec2f temp = n2.location - n1.location;
-	float m = temp.y / temp.x;
-	float c = n1.location.y - m* n1.location.x;
-	for (auto i : obst) {
-		float dist = abs(m*i.loc().x - i.loc().y + c) / hypot(m, 1);
-		if (dist < i.rad()) {
+	float x1 = n1.location.x;
+	float x2 = n2.location.x;
+	float y1 = n1.location.y;
+	float y2 = n2.location.y;
+
+	for (auto i : obst)
+	{
+		float xo = i.loc().x;
+		float yo = i.loc().y;
+		float lambda = std::pow((x1 - x2), 2) + std::pow((y1 - y2), 2);
+		float t = (std::pow(x1, 2) + x2 * xo - x1*(x2 + xo) - (yo - y1)*(y1 - y2)) / lambda;
+		float shortest_dist;
+		if (t >= 0 && t <= 1) // If the perpendicular distance lies on the line 'segment' connecting point_1 and point_2
+			shortest_dist = std::sqrt(std::pow((x2 * (y1 - yo) + x1 * (yo - y2) + xo * (y2 - y1)),2) / lambda );
+		else  // If not then only check for the end-points of the segment for the collision
+		{
+			float d1 = std::sqrt(std::pow((x1 - xo), 2) + std::pow((y1 - yo), 2));
+			float d2 = std::sqrt(std::pow((x2 - xo), 2) + std::pow((y2 - yo), 2));
+			shortest_dist = std::min(d1, d2);
+		}
+
+		if (shortest_dist < i.rad()) {
 			return false;
 		}
 	}
@@ -326,7 +342,7 @@ void RTRRTstar::updateNextBestPath()
 				break;
 			}
 			curr_node = tempNode;
-		} 
+		}
 	}
 }
 

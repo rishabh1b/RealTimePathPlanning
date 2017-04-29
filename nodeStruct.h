@@ -22,4 +22,5 @@ struct Nodes
 		costToStart = costToStart_;
 		parent = p_;
 	}
+
 };
