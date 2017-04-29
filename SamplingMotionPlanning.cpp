@@ -5,7 +5,10 @@
 #include "RT-RRTstar.h"
 
 bool SMP::goalFound = false;
+bool SMP::sampledInGoalRegion = false;
 bool SMP::moveNow = false;
+bool InformedRRTstar::usingInformedRRTstar = false;
+
 ofVec2f SMP::goal;
 ofVec2f SMP::start;
 Nodes* SMP::target = NULL;
@@ -24,6 +27,7 @@ void SMP::addNode(Nodes n, std::list<Nodes>& nodes)
 	if (n.location.distance(goal) < converge)
 	{
 		goalFound = true;
+		sampledInGoalRegion = true;
 		target = &(nodes.back());
 	}
 }
@@ -228,13 +232,16 @@ void InformedRRTstar::nextIter(std::list<Nodes> &nodes, const std::list<obstacle
 		while (it != sol_nodes.end())
 		{
 			if ((*it)->costToStart < min_cost)
+			{
 				min_cost = (*it)->costToStart;
+				SMP::target = *it;
+			}
 			it++;
 		}
 
 		RRTstar::nextIter(nodes, obst, &InformedRRTstar::sample(min_cost));
 	}
-	if (SMP::goalFound)
+	if (SMP::sampledInGoalRegion)
 		sol_nodes.push_back(&nodes.back());
 }
 
@@ -242,7 +249,7 @@ Nodes InformedRRTstar::sample(float c_max)
 {
 	float c_min = SMP::goal.distance(SMP::start);
 
-	if (std::abs(c_max - c_min) < 100) //Putting a dummy value for now - Robot might not move for some configurations with this value
+	if (std::abs(c_max - c_min) < 100 && usingInformedRRTstar) //Putting a dummy value for now - Robot might not move for some configurations with this value
 		SMP::moveNow = true; //TODO: The flag will be associated with time. Should turn on when the spcified time lapses
 
 	ofVec2f x_centre = (SMP::start + SMP::goal) / 2;

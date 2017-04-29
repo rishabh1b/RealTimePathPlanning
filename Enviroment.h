@@ -37,7 +37,6 @@ protected:
 	InformedRRTstar irrtstar;
 	bool rrtFlag = true;
 	bool planner = false;
-	bool vechicle = false;
 
 	ofVec2f goal;
 
@@ -72,33 +71,14 @@ inline void Enviroment::setup()
 
 inline void Enviroment::update()
 {
-	/*std::list<obstacles>::iterator itobs = obst.begin();
-	while (itobs != obst.end()) {
-		itobs->move();
-		itobs++;
-	}*/
-
 	//rrtstar.nextIter(nodes, obst);
+	//Following part is for Informed RRT*
 	irrtstar.nextIter(nodes, obst);
-	/*
-	if (rrtFlag) {
-		std::list<Nodes>::iterator it = nodes.begin();
-		while (it != nodes.end())
-		{
-			if (it->location.distance(goal) < converge)
-			{
-				rrtFlag = !rrtFlag;
-				target = &(*it);
-			}
-			it++;
-		}
-	}*/
+	InformedRRTstar::usingInformedRRTstar = true;
+	if (SMP::sampledInGoalRegion)
+		SMP::sampledInGoalRegion = false;
 
-	// goalFound flag turns on in addNode method when new-sample is sampled in goal region
-	if (SMP::goalFound)
-		SMP::goalFound = false;
-
-	if (SMP::moveNow && !planner)
+	if (SMP::target != NULL && !SMP::moveNow && InformedRRTstar::usingInformedRRTstar)
 	{
 		path.clear();
 		Nodes *pathNode = SMP::target;
@@ -107,12 +87,11 @@ inline void Enviroment::update()
 			path.push_back(*pathNode);
 			pathNode = pathNode->parent;
 		} while (pathNode->parent != NULL);
-		planner = !planner;
-		SMP::moveNow = false;
+		//planner = !planner;
 		path.reverse();
 	}
 
-	if (planner && !vechicle) {
+	if (SMP::moveNow && InformedRRTstar::usingInformedRRTstar) {
 		std::list<Nodes>::iterator pathIt = path.begin();
 
 		while(pathIt !=path.end()){

@@ -33,7 +33,6 @@ private:
 	std::list<Nodes*> closestNeighbours;
 
 	float timeKeeper;
-	//bool pathAvailable;
 	// Add a grid based indexing DS for nodes
 };
 
