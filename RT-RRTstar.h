@@ -1,5 +1,6 @@
 #pragma once
 #include<queue>
+#include"Robot.h"
 
 struct nodes_compare {
 	bool operator() (const Nodes* lhs, const Nodes* rhs) const {
@@ -12,7 +13,8 @@ struct nodes_compare {
 
 class RTRRTstar : public InformedRRTstar
 {
-	void nextIter(std::list<Nodes> &nodes, const std::list<obstacles*>& obst, Nodes* u_ = NULL);
+public:
+	void nextIter(std::list<Nodes> &nodes, const std::list<obstacles*>& obst, Robot* agent);
 	static std::set<Nodes*, nodes_compare> visited_set;
 	std::list<Nodes*> currPath;
 private:

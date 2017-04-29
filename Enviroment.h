@@ -7,6 +7,7 @@
 #include"Robot.h"
 #include"RRTstar.h"
 #include"InformedRRTstar.h"
+#include"RT-RRTstar.h"
 //--------------------------------------------------------------class
 class Enviroment
 {
@@ -40,6 +41,7 @@ protected:
 	std::list<Nodes> path;
 	RRTstar rrtstar;
 	InformedRRTstar irrtstar;
+	RTRRTstar rtrrtstar;
 	bool rrtFlag = true;
 	bool planner = false;
 
@@ -78,8 +80,11 @@ inline void Enviroment::update(Robot *car,list<obstacles*> obst)
 {
 	//rrtstar.nextIter(nodes, obst);
 	//Following part is for Informed RRT*
-	irrtstar.nextIter(nodes, obst);
-	InformedRRTstar::usingInformedRRTstar = true;
+	//irrtstar.nextIter(nodes, obst);
+	//InformedRRTstar::usingInformedRRTstar = true;
+
+	rtrrtstar.nextIter(nodes, obst, car);
+
 	if (SMP::sampledInGoalRegion)
 		SMP::sampledInGoalRegion = false;
 

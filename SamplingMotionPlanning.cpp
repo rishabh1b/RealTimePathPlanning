@@ -256,12 +256,13 @@ Nodes InformedRRTstar::sample(float c_max)
 	return n;
 }
 
-void RTRRTstar::nextIter(std::list<Nodes> &nodes, const std::list<obstacles*>& obst, Nodes* u_)
+void RTRRTstar::nextIter(std::list<Nodes> &nodes, const std::list<obstacles*>& obst, Robot* agent)
 {
 	timeKeeper = ofGetElapsedTimef();
 	expandAndRewire(nodes, obst);
-	updateNextBestPath();
-	if (currPath.size() > 1) //TODO:  Add this condition too  - car.getPosition() close to x0(root)
+	if (SMP::target != NULL)
+		updateNextBestPath();
+	if (currPath.size() > 1 && agent->getLocation().distance(SMP::root->location) < 0.5)
 	{
 		Nodes* nextPoint = *(currPath.begin()++); //Change the DS for path to vector?
 		SMP::root->location.x = nextPoint->location.x;
@@ -290,7 +291,7 @@ void RTRRTstar::expandAndRewire(std::list<Nodes>& nodes, const std::list<obstacl
 	if (!SMP::checkSample(u, obst)) return;
 	if (SMP::checkCollision(u, *v, obst))
 	{
-		if (this->closestNeighbours.size() < maxNeighbours)// || u.location.distance(v->location) > minDistClosestNode)
+		if (this->closestNeighbours.size() < maxNeighbours)//u.location.distance(v->location) > minDistClosestNode)
 		{
 			this->addNode(u, v, nodes, obst);
 		}
@@ -483,9 +484,9 @@ void RTRRTstar::rewireRandomNode(const list<obstacles*> &obst, std::list<Nodes> 
 				(*it)->parent = Xr;
 				(*it)->costToStart = newCost;
 				Xr->children.push_back(*it);
-				it++;
 				rewireRand.push_back(*it);
 			}
+			it++;
 		}
 	}
 }
@@ -496,42 +497,43 @@ void RTRRTstar::rewireFromRoot(const list<obstacles*> &obst, std::list<Nodes> &n
 		rewireRoot.push_back(SMP::root);
 	}
 
-	while (!rewireRoot.empty() || (ofGetElapsedTimef() - timeKeeper) < allowedTimeRewiring) {
-
-		Nodes* Xs = rewireRoot.front();
-		rewireRoot.pop_front();
-		std::list<Nodes*> nearNeighbours;
-		nearNeighbours = RRTstar::findClosestNeighbours(*Xs, nodes);
-
-		std::list<Nodes*>::iterator it = nearNeighbours.begin();
-		std::list<Nodes*> safeNeighbours;
-		while (it != nearNeighbours.end())
+	while (!rewireRoot.empty() && (ofGetElapsedTimef() - timeKeeper) < allowedTimeRewiring) {
 		{
-			if (SMP::checkCollision(*Xs, *(*it), obst))
-				safeNeighbours.push_back(*it);
-			it++;
-		}
-		if (safeNeighbours.empty()) continue;
+			Nodes* Xs = rewireRoot.front();
+			rewireRoot.pop_front();
+			std::list<Nodes*> nearNeighbours;
+			nearNeighbours = RRTstar::findClosestNeighbours(*Xs, nodes);
 
-		it = safeNeighbours.begin();
-		while (it != safeNeighbours.end()) {
-
-			float oldCost = cost(*it);
-			float newCost = cost(Xs) + Xs->location.distance((*it)->location);
-			if (newCost < oldCost) {
-
-				(*it)->prevParent = (*it)->parent;
-				(*it)->parent->children.remove(*it);
-				(*it)->parent = Xs;
-				(*it)->costToStart = newCost;
-				Xs->children.push_back(*it);
+			std::list<Nodes*>::iterator it = nearNeighbours.begin();
+			std::list<Nodes*> safeNeighbours;
+			while (it != nearNeighbours.end())
+			{
+				if (SMP::checkCollision(*Xs, *(*it), obst))
+					safeNeighbours.push_back(*it);
 				it++;
 			}
+			if (safeNeighbours.empty()) continue;
 
-			//TODO: take care of restarting the queue part
-			bool found = std::find(rewireRoot.begin(), rewireRoot.end(), (*it)) != rewireRoot.end();
-			if (!found) {
-				rewireRoot.push_back((*it));
+			safeNeighbours.remove(Xs->parent);
+			it = safeNeighbours.begin();
+			while (it != safeNeighbours.end()) {
+
+				float oldCost = cost(*it);
+				float newCost = cost(Xs) + Xs->location.distance((*it)->location);
+				if (newCost < oldCost) {
+
+					(*it)->prevParent = (*it)->parent;
+					(*it)->parent->children.remove(*it);
+					(*it)->parent = Xs;
+					(*it)->costToStart = newCost;
+					Xs->children.push_back(*it);
+				}
+				//TODO: take care of restarting the queue part
+				bool found = std::find(rewireRoot.begin(), rewireRoot.end(), (*it)) != rewireRoot.end();
+				if (!found) {
+					rewireRoot.push_back((*it));
+				}
+				it++;
 			}
 		}
 	}
