@@ -9,6 +9,7 @@ struct Nodes
 	bool alive = true;
 	ofColor color = { 10, 12, 160 };
 	float costToStart;
+	std::list<Nodes*> children;
 	Nodes()
 	{
 
@@ -20,4 +21,5 @@ struct Nodes
 		costToStart = costToStart_;
 		parent = p_;
 	}
+
 };

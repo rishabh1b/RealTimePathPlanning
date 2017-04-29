@@ -42,7 +42,6 @@ protected:
 	InformedRRTstar irrtstar;
 	bool rrtFlag = true;
 	bool planner = false;
-	bool vechicle = false;
 
 	ofVec2f goal;
 	ofVec2f home;
@@ -55,19 +54,9 @@ protected:
 inline void Enviroment::setup()
 {
 	home.set(startx, starty);
-	/*car = new Robot(home);*/
-
-	//for (unsigned int i = 0; i < numberOfobst; i++)
-	//{
-	//	obstacles ob;
-	//	obst.push_back(ob);
-	//}
-
 	Nodes start(startx, starty, 0);
 	this->nodes.push_back(start);
-	//goal.set(goalx, goaly);
 	SMP::start.set(startx, starty);
-	//SMP::goal = goal;
 	SMP::goalFound = false;
 }
 
@@ -75,52 +64,26 @@ inline void Enviroment::setup()
 inline void Enviroment::setup(ofVec2f _start)
 {
 	home = _start;
-	//car = new Robot(home);
-
-	//for (unsigned int i = 0; i < numberOfobst; i++)
-	//{
-	//	obstacles ob;
-	//	obst.push_back(ob);
-	//}
 
 	Nodes start(home.x, home.y, 0);
 	this->nodes.push_back(start);
-	//goal = _goal;
 
+	SMP::root = &(this->nodes.front());
+	goal.set(goalx, goaly);
 	SMP::start.set(startx, starty);
-	//SMP::goal = goal;
 	SMP::goalFound = false;
 }
 
 inline void Enviroment::update(Robot *car,list<obstacles*> obst)
 {
-	/*std::list<obstacles>::iterator itobs = obst.begin();
-	while (itobs != obst.end()) {
-		itobs->move();
-		itobs++;
-	}*/
-
 	//rrtstar.nextIter(nodes, obst);
+	//Following part is for Informed RRT*
 	irrtstar.nextIter(nodes, obst);
-	/*
-	if (rrtFlag) {
-		std::list<Nodes>::iterator it = nodes.begin();
-		while (it != nodes.end())
-		{
-			if (it->location.distance(goal) < converge)
-			{
-				rrtFlag = !rrtFlag;
-				target = &(*it);
-			}
-			it++;
-		}
-	}*/
+	InformedRRTstar::usingInformedRRTstar = true;
+	if (SMP::sampledInGoalRegion)
+		SMP::sampledInGoalRegion = false;
 
-	// goalFound flag turns on in addNode method when new-sample is sampled in goal region
-	if (SMP::goalFound)
-		SMP::goalFound = false;
-
-	if (SMP::moveNow && !planner)
+	if (SMP::target != NULL && !SMP::moveNow && InformedRRTstar::usingInformedRRTstar)
 	{
 		path.clear();
 		Nodes *pathNode = SMP::target;
@@ -129,12 +92,11 @@ inline void Enviroment::update(Robot *car,list<obstacles*> obst)
 			path.push_back(*pathNode);
 			pathNode = pathNode->parent;
 		} while (pathNode->parent != NULL);
-		planner = !planner;
-		SMP::moveNow = false;
+		//planner = !planner;
 		path.reverse();
 	}
 
-	if (planner && !vechicle) {
+	if (SMP::moveNow && InformedRRTstar::usingInformedRRTstar) {
 		std::list<Nodes>::iterator pathIt = path.begin();
 
 		while(pathIt !=path.end()){
@@ -150,6 +112,10 @@ inline void Enviroment::update(Robot *car,list<obstacles*> obst)
 		car->update();
 
 	}
+	//TODO: Looking at the car pose and its field of view look for obstacles falling in this field of view 
+	//and make the cost to reach for the nodes falling within specified radius as infinity. mark the alive flag for this node as false
+	//Mark each children of each of these nodes(till we reach the leaf node) as 'affected'(a boolean on Nodes class)
+	//and display these children in a different colour. Possibly, check at the time of drawing - if(alive and affected), then-draw in yellow colour
 }
 
 inline void Enviroment::targetSet(ofVec2f loc)
@@ -162,11 +128,6 @@ inline void Enviroment::targetSet(ofVec2f loc)
 inline void Enviroment::render()
 {
 	ofEnableAlphaBlending();
-	//for (auto i : obst) {
-	//	i.render();
-	//	//cout << i.getX() << "  " << i.getY() << endl;
-	//}
-
 
 	ofSetColor({255, 255, 10});
 	if (goalin) {
@@ -175,6 +136,7 @@ inline void Enviroment::render()
 		ofNoFill();
 		ofDrawCircle(goal.x, goal.y, converge);
 	}
+
 	for (auto i : this->nodes)
 	{
 		ofSetColor({ 10,10,10 });
@@ -213,27 +175,6 @@ inline void Enviroment::render()
 	}
 	ofDisableAlphaBlending();
 }
-
-//inline void Enviroment::render()
-//{
-//	if (grid == true) renderGrid();
-//	ofEnableAlphaBlending();
-//	for (size_t i = 0; i < TotalNodes; i++)
-//	{
-//		float x = ofRandom(0, ofGetWindowWidth());
-//		float y = ofRandom(0, ofGetWindowHeight());
-//
-//		Nodes node; 
-//
-//		node.location.set(x,y);
-//		int hue = node.alive ? 130 : 80;
-//		ofSetColor(node.color, hue);
-//
-//		ofDrawCircle(node.location.x, node.location.y, NODE_RADIUS);
-//	}
-//
-//	ofDisableAlphaBlending();
-//}
 
 inline void Enviroment::renderGrid()
 {
