@@ -13,6 +13,8 @@ public:
 	float getX() { return location.x;}
 	float getY() { return location.y;}
 	virtual  bool isCircle() { return true; }
+	virtual bool isCollide(ofVec2f, ofVec2f);
+	virtual bool isInside(ofVec2f);
 private:
 	ofVec2f location;
 	float radius;
@@ -33,6 +35,8 @@ public:
 	ofVec2f loc() { return this->location; }
 	float rad() { return this->radius; }
 	bool isCircle() { return true; }
+	bool isCollide(ofVec2f, ofVec2f);
+	bool isInside(ofVec2f);
 private:
 	ofVec2f location;
 	float radius;
@@ -52,8 +56,11 @@ public:
 	void move();
 	ofVec2f getloc() { return this->location;}
 	bool isCircle() { return false; }
+	bool isCollide(ofVec2f p1, ofVec2f p2);
+	bool isInside(ofVec2f p);
 private:
 	ofColor color;
 	ofVec2f location;
 	float width, height;
+	ofRectangle rect;
 };

@@ -41,6 +41,36 @@ void obstacles::render()
 	ofDisableAlphaBlending();
 }
 
+bool obstacles::isCollide(ofVec2f n1, ofVec2f n2)
+{
+	float x1 = n1.x;
+	float x2 = n2.x;
+	float y1 = n1.y;
+	float y2 = n2.y;
+
+	float xo = location.x;
+	float yo = location.y;
+	float lambda = std::pow((x1 - x2), 2) + std::pow((y1 - y2), 2);
+	float t = (std::pow(x1, 2) + x2 * xo - x1*(x2 + xo) - (yo - y1)*(y1 - y2)) / lambda;
+	float shortest_dist;
+	if (t >= 0 && t <= 1) // If the perpendicular distance lies on the line 'segment' connecting point_1 and point_2
+		shortest_dist = std::sqrt(std::pow((x2 * (y1 - yo) + x1 * (yo - y2) + xo * (y2 - y1)), 2) / lambda);
+	else  // If not then only check for the end-points of the segment for the collision
+	{
+		float d1 = std::sqrt(std::pow((x1 - xo), 2) + std::pow((y1 - yo), 2));
+		float d2 = std::sqrt(std::pow((x2 - xo), 2) + std::pow((y2 - yo), 2));
+		shortest_dist = std::min(d1, d2);
+	}
+
+	if (shortest_dist < radius) 	return true;
+	return false;
+}
+
+bool obstacles::isInside(ofVec2f n)
+{
+	return (n.distance(location) <= radius);
+}
+
 movingObst::movingObst()
 {
 	float x = ofRandom(0, ofGetWindowWidth());
@@ -101,13 +131,43 @@ void movingObst::move()
 	location += velocity;
 }
 #endif // automatic
+bool movingObst::isCollide(ofVec2f n1, ofVec2f n2)
+{
+	float x1 = n1.x;
+	float x2 = n2.x;
+	float y1 = n1.y;
+	float y2 = n2.y;
 
+	float xo = location.x;
+	float yo = location.y;
+	float lambda = std::pow((x1 - x2), 2) + std::pow((y1 - y2), 2);
+	float t = (std::pow(x1, 2) + x2 * xo - x1*(x2 + xo) - (yo - y1)*(y1 - y2)) / lambda;
+	float shortest_dist;
+	if (t >= 0 && t <= 1) // If the perpendicular distance lies on the line 'segment' connecting point_1 and point_2
+		shortest_dist = std::sqrt(std::pow((x2 * (y1 - yo) + x1 * (yo - y2) + xo * (y2 - y1)), 2) / lambda);
+	else  // If not then only check for the end-points of the segment for the collision
+	{
+		float d1 = std::sqrt(std::pow((x1 - xo), 2) + std::pow((y1 - yo), 2));
+		float d2 = std::sqrt(std::pow((x2 - xo), 2) + std::pow((y2 - yo), 2));
+		shortest_dist = std::min(d1, d2);
+	}
+
+	if (shortest_dist < radius) 	return true;
+	return false;
+}
+bool movingObst::isInside(ofVec2f n)
+{
+	return (n.distance(location) <= radius);
+}
 maze::maze(ofVec2f loc)
 {
 	location = loc;
 	color = { 10,10,50 };
-	height = 0.40*ofGetHeight();
-	width = 20;
+	rect.height = 0.40*ofGetHeight();
+	rect.width = 20;
+	rect.x = loc.x;
+	rect.y = loc.y;
+	
 }
 
 maze::~maze()
@@ -119,7 +179,8 @@ void maze::render()
 	ofEnableAlphaBlending();
 	ofSetColor(color);
 	ofFill();
-	ofRect(location.x, location.y, width, height);
+	//ofRect(location.x, location.y, width, height);
+	ofDrawRectangle(rect);
 	ofNoFill();
 	ofDisableAlphaBlending();
 }
@@ -127,4 +188,14 @@ void maze::render()
 void maze::move()
 {
 
+}
+
+bool maze::isCollide(ofVec2f p1, ofVec2f p2)
+{
+	return rect.intersects(p1,p2);
+}
+
+bool maze::isInside(ofVec2f p)
+{
+	return rect.inside(p);
 }
