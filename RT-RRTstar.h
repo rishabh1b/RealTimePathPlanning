@@ -34,6 +34,8 @@ private:
 	std::list<Nodes*> rewireRoot;
 	std::list<Nodes*> closestNeighbours;
 
+	std::list<Nodes*> pushedToRewireRoot;
+
 	float timeKeeper;
 	// Add a grid based indexing DS for nodes
 };

@@ -189,7 +189,8 @@ std::list<Nodes*> RRTstar::findClosestNeighbours(Nodes u, std::list<Nodes>& node
 
 	while (it != nodes.end())
 	{
-		if (u.location.distance(it->location) < rrtstarradius)
+		float f = u.location.distance(it->location);
+		if (f < rrtstarradius && f > 0.0001)
 		{
 			closestNeighbours.push_back(&(*it));
 		}
@@ -299,9 +300,9 @@ void RTRRTstar::expandAndRewire(std::list<Nodes>& nodes, const std::list<obstacl
 		{
 			this->rewireRand.push_front(v);
 		}
-		rewireRandomNode(obst, nodes);
+		//rewireRandomNode(obst, nodes);
 	}
-	rewireFromRoot(obst, nodes);
+	//rewireFromRoot(obst, nodes);
 }
 
 void RTRRTstar::updateNextBestPath()
@@ -412,6 +413,7 @@ void RTRRTstar::addNode(Nodes n, Nodes* closest, std::list<Nodes>& nodes, const 
 			parent = *it;
 			n.costToStart = c_min;
 		}
+		it++;
 	}
 	n.parent = parent;
 	nodes.push_back(n);
@@ -424,6 +426,8 @@ void RTRRTstar::addNode(Nodes n, Nodes* closest, std::list<Nodes>& nodes, const 
 	//TODO: Add the node to the Grid based/KD-Tree Data structure
 
 	this->rewireRand.push_front(&(nodes.back()));
+
+	closestNeighbours.clear();
 }
 
 float RTRRTstar::cost(Nodes* node)
@@ -453,7 +457,7 @@ float RTRRTstar::cost(Nodes* node)
 
 void RTRRTstar::rewireRandomNode(const list<obstacles*> &obst, std::list<Nodes> &nodes)
 {
-	while (!rewireRand.empty() && (ofGetElapsedTimef() - timeKeeper) < 0.5 * allowedTimeRewiring)
+	while (!rewireRand.empty())// && (ofGetElapsedTimef() - timeKeeper) < 0.5 * allowedTimeRewiring)
 	{
 		Nodes* Xr = rewireRand.front();
 		rewireRand.pop_front();
@@ -497,7 +501,7 @@ void RTRRTstar::rewireFromRoot(const list<obstacles*> &obst, std::list<Nodes> &n
 		rewireRoot.push_back(SMP::root);
 	}
 
-	while (!rewireRoot.empty() && (ofGetElapsedTimef() - timeKeeper) < allowedTimeRewiring) {
+	while (!rewireRoot.empty())// && (ofGetElapsedTimef() - timeKeeper) < allowedTimeRewiring) {
 		{
 			Nodes* Xs = rewireRoot.front();
 			rewireRoot.pop_front();
@@ -529,15 +533,15 @@ void RTRRTstar::rewireFromRoot(const list<obstacles*> &obst, std::list<Nodes> &n
 					Xs->children.push_back(*it);
 				}
 				//TODO: take care of restarting the queue part
-				bool found = std::find(rewireRoot.begin(), rewireRoot.end(), (*it)) != rewireRoot.end();
+				bool found = std::find(pushedToRewireRoot.begin(), pushedToRewireRoot.end(), (*it)) != pushedToRewireRoot.end();
 				if (!found) {
 					rewireRoot.push_back((*it));
+					pushedToRewireRoot.push_back((*it));
 				}
 				it++;
 			}
 		}
 	}
-}
 
 float RTRRTstar::getHeuristic(Nodes* u) {
 	if (visited_set.find(u) != visited_set.end())

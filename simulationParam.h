@@ -31,7 +31,7 @@ const float inf = std::numeric_limits<float>::infinity();
 #define epsilon 20
 #define rrtstarradius 25
 #define allowedTimeRewiring 0.033
-#define maxNeighbours 10
+#define maxNeighbours 50
 #define minDistClosestNode 5
 #define alpha 0.1
 #define beta 1.4
