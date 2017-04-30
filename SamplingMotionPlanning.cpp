@@ -279,13 +279,14 @@ void RTRRTstar::nextIter(std::list<Nodes> &nodes, const std::list<obstacles*>& o
 
 void RTRRTstar::changeRoot(Nodes* nextPoint, std::list<Nodes>& nodes)
 {
-	std::list<Nodes*> oldRootChildren = SMP::root->children;
-	nextPoint->children.insert(nextPoint->children.end(), oldRootChildren.begin(), oldRootChildren.end());
+	nextPoint->children.push_back(SMP::root);
 	nextPoint->parent = NULL;
 	nextPoint->prevParent = NULL;
 	nextPoint->costToStart = 0;
-	*(nodes.begin()) = *nextPoint;
-	SMP::root = &(nodes.front());
+
+	SMP::root->parent = nextPoint;
+	SMP::root->costToStart = SMP::root->location.distance(nextPoint->location);
+	SMP::root = nextPoint;
 }
 
 void RTRRTstar::expandAndRewire(std::list<Nodes>& nodes, const std::list<obstacles*>& obst)

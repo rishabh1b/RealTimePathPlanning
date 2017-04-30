@@ -170,14 +170,15 @@ inline void Enviroment::render()
 		ofSetColor({ 10,10,10 });
 
 		if (i.costToStart == inf) ofSetColor({ 255,0,0 });
-
+		ofSetLineWidth(2);
 		if (i.parent != NULL) {
 			ofPoint pt;ofPolyline line;
 			pt.set(i.location.x, i.location.y);line.addVertex(pt);
 			pt.set(i.parent->location.x, i.parent->location.y);line.addVertex(pt);
 			line.draw();
 		}
-		ofSetColor({ 10,250,250 });
+		ofSetColor({ 10,250,250 },80);
+		ofSetLineWidth(1);
 		if (i.prevParent != NULL) {
 			
 			ofPoint pt; ofPolyline line;
