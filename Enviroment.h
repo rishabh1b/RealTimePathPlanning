@@ -157,19 +157,21 @@ inline void Enviroment::render()
 {
 	ofEnableAlphaBlending();
 
-	ofSetColor({255, 255, 10});
+	ofSetColor({150, 0, 255});
 	if (goalin) {
 		ofFill();
-		ofDrawCircle(goal.x, goal.y, NODE_RADIUS);
+		ofDrawCircle(goal.x, goal.y, NODE_RADIUS+2);
 		ofNoFill();
+		ofSetLineWidth(2);
 		ofDrawCircle(goal.x, goal.y, converge);
 	}
 
 	for (auto i : this->nodes)
 	{
-		ofSetColor({ 10,10,10 });
+		ofSetColor({ 10,10,10 },150);
 
-		if (i.costToStart == inf) ofSetColor({ 255,0,0 });
+		if (i.costToStart == inf) ofSetColor({ 200,0,0 },120);
+		
 		ofSetLineWidth(2);
 		if (i.parent != NULL) {
 			ofPoint pt;ofPolyline line;
@@ -177,22 +179,22 @@ inline void Enviroment::render()
 			pt.set(i.parent->location.x, i.parent->location.y);line.addVertex(pt);
 			line.draw();
 		}
-		ofSetColor({ 10,250,250 },80);
+		//ofSetColor({ 10,10,250 },80);
 		ofSetLineWidth(1);
-		if (i.prevParent != NULL) {
-			
-			ofPoint pt; ofPolyline line;
-			pt.set(i.location.x, i.location.y); line.addVertex(pt);
-			pt.set(i.prevParent->location.x, i.prevParent->location.y); line.addVertex(pt);
-			line.draw();
-		}
-		int hue = i.alive ? 130 : 80;
-		ofSetColor(i.color, hue);
+		//if (i.prevParent != NULL) {
+		//	
+		//	ofPoint pt; ofPolyline line;
+		//	pt.set(i.location.x, i.location.y); line.addVertex(pt);
+		//	pt.set(i.prevParent->location.x, i.prevParent->location.y); line.addVertex(pt);
+		//	line.draw();
+		//}
+		//int hue = i.alive ? 130 : 80;
+		//ofSetColor(i.color, hue);
 		//ofDrawCircle(i.location.x, i.location.y, NODE_RADIUS);
 	}
 	if (!path.empty())
 	{
-		ofSetColor({ 20,250,30 });
+		ofSetColor({ 10,250,10 });
 		ofSetLineWidth(5);
 		for (auto i : path) {
 			if (i->parent != NULL) {

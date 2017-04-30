@@ -11,7 +11,7 @@ void ofApp::setup() {
 	ofSetVerticalSync(true);
 	ofSetFrameRate(30);
 	ofSetWindowTitle("Dynamic-obstacles");
-	ofBackground(200,200,200);
+	ofBackground(200,200,200,200);
 	//map = new Enviroment();
 	//car.setup();
 	for (unsigned int i = 0; i < numberOfobst; i++)

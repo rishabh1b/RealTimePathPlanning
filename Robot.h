@@ -25,19 +25,19 @@ public:
 	void controller(ofVec2f target);
 	//Find Path from assign node
 	//void fly(Nodes *&nodes);
-	// Return state of quadCopter
+	// Return state of Robot
 	bool isAlive() { return alive; }
 	// Return X cordinate
 	float x() { return location.x; }
 	// Return Y cordinate
 	float y() { return location.y; }
-	// Return scanning accuracy of quadCopter
+	// Return scanning accuracy of Robot
 	float accu() { return accuracy; }
-	// Return scanning radius of quadCopter
+	// Return scanning radius of Robot
 	float getScanRadius() { return scanRadius; }
-	// Return Location of quadCopter
+	// Return Location of Robot
 	ofVec2f getLocation() { return location; }
-	//Return Color of quadCopter
+	//Return Color of Robot
 	ofColor getColor() { return color; }
 	void fillEnviroment(const list<obstacles*> obst,list<Nodes> &node);
 	void updateEnviroment(list<Nodes> &node, obstacles *obst);
