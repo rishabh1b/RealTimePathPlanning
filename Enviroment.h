@@ -156,7 +156,9 @@ inline void Enviroment::targetSet(ofVec2f loc)
 		}
 		it++;
 	}
+	SMP::goalFound = false;
 	SMP::target = NULL;
+	path.clear();
 	goalin = true;
 }
 
