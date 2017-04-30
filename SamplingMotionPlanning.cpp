@@ -8,6 +8,7 @@ bool SMP::goalFound = false;
 bool SMP::sampledInGoalRegion = false;
 bool SMP::moveNow = false;
 bool InformedRRTstar::usingInformedRRTstar = false;
+bool RTRRTstar::goalDefined = false;
 
 ofVec2f SMP::goal;
 ofVec2f SMP::start;
@@ -263,19 +264,28 @@ void RTRRTstar::nextIter(std::list<Nodes> &nodes, const std::list<obstacles*>& o
 	expandAndRewire(nodes, obst);
 	if (SMP::goalFound)
 		updateNextBestPath();
-	if (currPath.size() > 1 && agent->getLocation().distance(SMP::root->location) < 0.001)
+	if (currPath.size() > 1 && agent->getLocation().distance(SMP::root->location) < 0.1)
 	{
-		Nodes* nextPoint = *(currPath.begin()++); //Change the DS for path to vector?
-		SMP::root->location.x = nextPoint->location.x;
-		SMP::root->location.y = nextPoint->location.y;
+		//We have to pre-increment rather than post-increment
+		Nodes* nextPoint = *((++currPath.begin())); //Change the DS for path to vector?
+		changeRoot(nextPoint, nodes);
 
-		currPath.clear();
-		currPath.push_back(SMP::root);
 		RTRRTstar::visited_set.clear();
 		pushedToRewireRoot.clear();
+		rewireRoot.clear();
 	}
-	//SMP::moveNow = true; //might not be needed
 	closestNeighbours.clear();
+}
+
+void RTRRTstar::changeRoot(Nodes* nextPoint, std::list<Nodes>& nodes)
+{
+	std::list<Nodes*> oldRootChildren = SMP::root->children;
+	nextPoint->children.insert(nextPoint->children.end(), oldRootChildren.begin(), oldRootChildren.end());
+	nextPoint->parent = NULL;
+	nextPoint->prevParent = NULL;
+	nextPoint->costToStart = 0;
+	*(nodes.begin()) = *nextPoint;
+	SMP::root = &(nodes.front());
 }
 
 void RTRRTstar::expandAndRewire(std::list<Nodes>& nodes, const std::list<obstacles*>& obst)
@@ -317,11 +327,13 @@ void RTRRTstar::updateNextBestPath()
 		{
 			currPath.push_back(pathNode);
 			pathNode = pathNode->parent;
-		} while (pathNode->parent != NULL);
+		} while (pathNode != NULL);
 		currPath.reverse();
 		return;
 	}
 	else {
+		if (!goalDefined)
+			return;
 		Nodes* curr_node = SMP::root;
 		while (!curr_node->children.empty())
 		{
@@ -336,6 +348,7 @@ void RTRRTstar::updateNextBestPath()
 					minCost = cost_new;
 					tempNode = *it;
 				}
+				it++;
 			}
 			updatedPath.push_back(tempNode);
 			if (tempNode->children.empty() || cost(tempNode) == inf)
@@ -345,9 +358,13 @@ void RTRRTstar::updateNextBestPath()
 			}
 			curr_node = tempNode;
 		}
+		if (currPath.size() == 0)
+			currPath.push_back(SMP::root);
+
+		if (updatedPath.back()->location.distance(SMP::goal) < currPath.back()->location.distance(SMP::goal))
+			currPath = updatedPath;
 	}
-	if (updatedPath.back()->location.distance(SMP::target->location) < currPath.back()->location.distance(SMP::target->location))
-		currPath = updatedPath;
+	
 }
 
 Nodes RTRRTstar::sample()
@@ -424,7 +441,10 @@ void RTRRTstar::addNode(Nodes n, Nodes* closest, std::list<Nodes>& nodes, const 
 
 	if (n.location.distance(SMP::goal) < converge)
 	{
-		SMP::target = &(nodes.back());
+		if (SMP::target == NULL || (SMP::target != NULL && SMP::target->costToStart > n.costToStart))
+		{
+			SMP::target = &(nodes.back());
+		}
 		SMP::goalFound = true;
 	}
 	//TODO: Add the node to the Grid based/KD-Tree Data structure
@@ -549,7 +569,7 @@ float RTRRTstar::getHeuristic(Nodes* u) {
 	if (visited_set.find(u) != visited_set.end())
 		return inf;
 	else
-		return u->location.distance(SMP::target->location);
+		return u->location.distance(SMP::goal);
 }
 
 //method not used

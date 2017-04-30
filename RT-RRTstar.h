@@ -16,6 +16,7 @@ class RTRRTstar : public InformedRRTstar
 public:
 	void nextIter(std::list<Nodes> &nodes, const std::list<obstacles*>& obst, Robot* agent);
 	static std::set<Nodes*, nodes_compare> visited_set;
+	static bool goalDefined;
 	std::list<Nodes*> currPath;
 private:
 	void expandAndRewire(std::list<Nodes>& nodes, const std::list<obstacles*>& obst);
@@ -27,6 +28,7 @@ private:
 	void rewireFromRoot(const list<obstacles*> &obst, std::list<Nodes> &nodes);
 	float cost(Nodes* node);
 	float getHeuristic(Nodes* u);
+	void changeRoot(Nodes* nextPoint, std::list<Nodes>& nodes);
 	bool isPathToGoalAvailable();
 	//std::list<Nodes*> RTRRTstar::findNodesNear(Nodes u);
 

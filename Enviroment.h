@@ -43,7 +43,7 @@ protected:
 	InformedRRTstar irrtstar;
 	RTRRTstar rtrrtstar;
 	bool rrtFlag = true;
-	bool planner = false;
+	bool planner = true;
 
 	ofVec2f goal;
 	ofVec2f home;
@@ -78,37 +78,36 @@ inline void Enviroment::setup(ofVec2f _start)
 
 inline void Enviroment::update(Robot *car,list<obstacles*> obst)
 {
+	//RRTstar - 
 	//rrtstar.nextIter(nodes, obst);
-	//Following part is for Informed RRT*
+
+	//Informed RRT*-
 	//irrtstar.nextIter(nodes, obst);
 	//InformedRRTstar::usingInformedRRTstar = true;
 
+	//RTRRTstar-
+	if (car->getLocation().distance(SMP::goal) < converge)
+		planner = false;
 
-	car->fillEnviroment(obst, nodes);
-	rtrrtstar.nextIter(nodes, obst, car);
-	car->controller(SMP::root->location);
-	car->update();
-
-	if (SMP::sampledInGoalRegion)
-		SMP::sampledInGoalRegion = false;
-
-	if (SMP::target != NULL)
+	if (planner)
 	{
-		path.clear();
-		path = rtrrtstar.currPath;
-		//std::list<Nodes*>::iterator it = rtrrtstar.currPath.begin();
-
-		//path.clear();
-		//Nodes *pathNode = SMP::target;
-		//do
-		//{
-		//	path.push_back(*pathNode);
-		//	pathNode = pathNode->parent;
-		//} while (pathNode->parent != NULL);
-		////planner = !planner;
-		//path.reverse();
+		car->fillEnviroment(obst, nodes);
+		car->controller(SMP::root->location);
+		car->update();
 	}
-	/*
+
+	rtrrtstar.nextIter(nodes, obst, car);
+
+	if (planner && SMP::target != NULL)
+	{
+		path = rtrrtstar.currPath;
+		rtrrtstar.currPath.clear();
+	}
+	
+	/* Following is Informed RRT-star stuff
+	if (SMP::sampledInGoalRegion)
+	SMP::sampledInGoalRegion = false;
+
 	if (SMP::target != NULL && !SMP::moveNow && InformedRRTstar::usingInformedRRTstar)
 	{
 		path.clear();
@@ -148,6 +147,9 @@ inline void Enviroment::targetSet(ofVec2f loc)
 {
 	goal = loc;
 	SMP::goal = goal;
+	RTRRTstar::goalDefined = true;
+	
+	//TODO: Add Multi-Query Behaviour
 	goalin = true;
 }
 
