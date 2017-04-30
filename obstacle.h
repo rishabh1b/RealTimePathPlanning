@@ -6,7 +6,7 @@ public:
 	obstacles();
 	obstacles(ofVec2f loc);
 	~obstacles();
-	virtual void move();
+	virtual void move(std::list<obstacles*> obst);
 	virtual void render();
 	virtual ofVec2f loc(){ return location; }
 	virtual float rad() { return radius; }
@@ -30,7 +30,7 @@ public:
 	void move(char key);
 #endif // manual
 #ifdef automatic
-	void move();
+	void move(std::list<obstacles*> obst);
 #endif // automatic
 	ofVec2f loc() { return this->location; }
 	float rad() { return this->radius; }
@@ -41,7 +41,7 @@ private:
 	ofVec2f location;
 	float radius;
 	ofColor color;
-	int maxVal;
+	float maxVal;
 #ifdef automatic
 	ofVec2f velocity;
 #endif // automatic
@@ -53,7 +53,7 @@ public:
 	maze(ofVec2f loc);
 	~maze();
 	void render();
-	void move();
+	void move(std::list<obstacles*> obst);
 	ofVec2f getloc() { return this->location;}
 	bool isCircle() { return false; }
 	bool isCollide(ofVec2f p1, ofVec2f p2);

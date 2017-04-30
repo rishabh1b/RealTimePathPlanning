@@ -16,18 +16,20 @@ void ofApp::setup() {
 	//car.setup();
 	for (unsigned int i = 0; i < numberOfobst; i++)
 	{
-		obstacles *ob = new obstacles();
+		//obstacles *ob = new obstacles();
+		OBST = new movingObst();
+		obstacles *ob = OBST;
 		obst.push_back(ob);
 	}
-	
-	OBST = new movingObst();
-	obstacles *ob = OBST;
-	obst.push_back(ob);
+	//
+	//OBST = new movingObst();
+	//obstacles *ob = OBST;
+	//obst.push_back(ob);
 
 	ofVec2f w;
 	w.set(ofGetWidth() / 2, 0);
 	wall = new maze(w);
-	ob = wall;
+	obstacles *ob = wall;
 	obst.push_back(ob);
 
 	w.set(ofGetWidth() / 2, 0.6*ofGetHeight());
@@ -60,7 +62,7 @@ void ofApp::update(){
 #ifdef automatic
 
 	for (auto i : obst) {
-		i->move();
+		i->move(obst);
 		//cout << "location: " << i->loc() << "Radius: " << i->rad() << endl;
 		//cout << i.getX() << "  " << i.getY() << endl;
 	}

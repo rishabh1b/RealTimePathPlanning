@@ -20,7 +20,7 @@ obstacles::~obstacles()
 {
 }
 
-void obstacles::move()  
+void obstacles::move(std::list<obstacles*> obst)
 {
 	//float stepsize = ofRandom(0, 10);
 	//float stepx = ofRandom(-stepsize, stepsize);
@@ -36,7 +36,7 @@ void obstacles::render()
 	ofEnableAlphaBlending();
 	ofSetColor(color);
 	ofFill();
-	ofDrawCircle(location.x, location.y, radius);
+	ofDrawCircle(location.x, location.y, radius-2);
 	ofNoFill();
 	ofDisableAlphaBlending();
 }
@@ -78,7 +78,7 @@ movingObst::movingObst()
 	location.set(x, y);
 	maxVal = obstMaxVelocity;
 #ifdef automatic
-	velocity.set(maxVal, maxVal);
+	velocity.set(maxVal*ofRandom(-2,2), maxVal*ofRandom(-2, 2));
 #endif // automatic
 	radius = 30;
 	color = { 200,100,20 };
@@ -93,7 +93,7 @@ void movingObst::render()
 	ofEnableAlphaBlending();
 	ofSetColor(color);
 	ofFill();
-	ofDrawCircle(location.x, location.y, radius);
+	ofDrawCircle(location.x, location.y, radius-2);
 	ofNoFill();
 	ofDisableAlphaBlending();
 }
@@ -119,8 +119,22 @@ void movingObst::move(char key)
 }
 #endif // 
 #ifdef automatic
-void movingObst::move()
+void movingObst::move(std::list<obstacles*> obst)
 {
+	//ofVec2f temp, maxForce;
+	//for (auto i : obst) {
+	//	if (!i->isCircle())
+	//	{
+	//	ofVec2f dir = location - i->loc();
+	//	float accel = 10 / (dir.length() *dir.length());
+	//	temp += accel* dir.normalized();
+	//}
+	//}
+	//maxForce.set(mForce, mForce);
+	//temp = (temp.length() <= maxForce.length()) ? temp : (temp.normalized() *mForce);
+	//velocity -= temp;	
+
+
 	if (location.y+radius >= ofGetHeight() || location.y- radius <= 0) {
 		velocity.y = velocity.y*-1;
 	}
@@ -163,8 +177,8 @@ maze::maze(ofVec2f loc)
 {
 	location = loc;
 	color = { 10,10,50 };
-	rect.height = 0.40*ofGetHeight();
-	rect.width = 20;
+	rect.height = 0.40*ofGetHeight()-2;
+	rect.width = 20-2;
 	rect.x = loc.x;
 	rect.y = loc.y;
 	
@@ -185,7 +199,7 @@ void maze::render()
 	ofDisableAlphaBlending();
 }
 
-void maze::move()
+void maze::move(std::list<obstacles*> obst)
 {
 
 }
