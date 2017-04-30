@@ -10,7 +10,8 @@ void Robot::setup()
 		accelaration.set(0.0, 0.0);
 		maxVelocity.set(mVal, mVal);
 		maxForce.set(mForce, mForce);
-		color = { ofRandom(0,255),ofRandom(0,255) ,ofRandom(0,255) };
+		//color = { ofRandom(0,255),ofRandom(0,255) ,ofRandom(0,255) };
+		color = {50,145,80};
 }
 
 void Robot::setup(ofVec2f loc)
@@ -22,7 +23,7 @@ void Robot::setup(ofVec2f loc)
 	accelaration.set(0.0, 0.0);
 	maxVelocity.set(mVal, mVal);
 	maxForce.set(mForce, mForce);
-	color = { ofRandom(0,255),ofRandom(0,255) ,ofRandom(0,255) };
+	color = { 50,145,80 };
 }
 
 void Robot::update()
@@ -42,7 +43,11 @@ void Robot::render()
 	ofEnableAlphaBlending();
 	ofFill();
 	ofSetColor(color);
+	ofSetLineWidth(3);
+
 	this->line.draw();
+
+	ofSetLineWidth(1);
 	ofNoFill();
 	ofSetColor(color);
 	ofDrawCircle(location.x,location.y,scanRadius);
