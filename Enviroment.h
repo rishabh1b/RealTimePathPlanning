@@ -104,8 +104,8 @@ inline void Enviroment::update(Robot *car,list<obstacles*> obst)
 		rtrrtstar.currPath.clear();
 	}
 	
-	/* Following is Informed RRT-star stuff
-	if (SMP::sampledInGoalRegion)
+	//Following is Informed RRT-star stuff
+	/*if (SMP::sampledInGoalRegion)
 	SMP::sampledInGoalRegion = false;
 
 	if (SMP::target != NULL && !SMP::moveNow && InformedRRTstar::usingInformedRRTstar)
@@ -137,10 +137,6 @@ inline void Enviroment::update(Robot *car,list<obstacles*> obst)
 		car->update();
 
 	}*/
-	//TODO: Looking at the car pose and its field of view look for obstacles falling in this field of view 
-	//and make the cost to reach for the nodes falling within specified radius as infinity. mark the alive flag for this node as false
-	//Mark each children of each of these nodes(till we reach the leaf node) as 'affected'(a boolean on Nodes class)
-	//and display these children in a different colour. Possibly, check at the time of drawing - if(alive and affected), then-draw in yellow colour
 }
 
 inline void Enviroment::targetSet(ofVec2f loc)
@@ -149,7 +145,18 @@ inline void Enviroment::targetSet(ofVec2f loc)
 	SMP::goal = goal;
 	RTRRTstar::goalDefined = true;
 	
-	//TODO: Add Multi-Query Behaviour
+	planner = true;
+	std::list<Nodes>::iterator it = nodes.begin();
+	while (it != nodes.end())
+	{
+		if ((*it).location.distance(loc) < converge)
+		{
+			SMP::target = &(*it);
+			return;
+		}
+		it++;
+	}
+	SMP::target = NULL;
 	goalin = true;
 }
 
