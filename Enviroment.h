@@ -38,7 +38,7 @@ protected:
 	//--------------------------------------------------------------Variables
 	std::list<Nodes> nodes;
 	//std::list<obstacles> obst;
-	std::list<Nodes> path;
+	std::list<Nodes*> path;
 	RRTstar rrtstar;
 	InformedRRTstar irrtstar;
 	RTRRTstar rtrrtstar;
@@ -80,15 +80,35 @@ inline void Enviroment::update(Robot *car,list<obstacles*> obst)
 {
 	//rrtstar.nextIter(nodes, obst);
 	//Following part is for Informed RRT*
-	irrtstar.nextIter(nodes, obst);
-	car->fillEnviroment(obst, nodes);
+	//irrtstar.nextIter(nodes, obst);
 	//InformedRRTstar::usingInformedRRTstar = true;
 
-	//rtrrtstar.nextIter(nodes, obst, car);
+
+	car->fillEnviroment(obst, nodes);
+	rtrrtstar.nextIter(nodes, obst, car);
+	car->controller(SMP::root->location);
+	car->update();
 
 	if (SMP::sampledInGoalRegion)
 		SMP::sampledInGoalRegion = false;
 
+	if (SMP::target != NULL)
+	{
+		path.clear();
+		path = rtrrtstar.currPath;
+		//std::list<Nodes*>::iterator it = rtrrtstar.currPath.begin();
+
+		//path.clear();
+		//Nodes *pathNode = SMP::target;
+		//do
+		//{
+		//	path.push_back(*pathNode);
+		//	pathNode = pathNode->parent;
+		//} while (pathNode->parent != NULL);
+		////planner = !planner;
+		//path.reverse();
+	}
+	/*
 	if (SMP::target != NULL && !SMP::moveNow && InformedRRTstar::usingInformedRRTstar)
 	{
 		path.clear();
@@ -100,8 +120,8 @@ inline void Enviroment::update(Robot *car,list<obstacles*> obst)
 		} while (pathNode->parent != NULL);
 		//planner = !planner;
 		path.reverse();
-	}
-
+	}*/
+	/*
 	if (SMP::moveNow && InformedRRTstar::usingInformedRRTstar) {
 		std::list<Nodes>::iterator pathIt = path.begin();
 
@@ -117,7 +137,7 @@ inline void Enviroment::update(Robot *car,list<obstacles*> obst)
 		if(pathIt!=path.end())
 		car->update();
 
-	}
+	}*/
 	//TODO: Looking at the car pose and its field of view look for obstacles falling in this field of view 
 	//and make the cost to reach for the nodes falling within specified radius as infinity. mark the alive flag for this node as false
 	//Mark each children of each of these nodes(till we reach the leaf node) as 'affected'(a boolean on Nodes class)
@@ -172,10 +192,10 @@ inline void Enviroment::render()
 		ofSetColor({ 20,250,30 });
 		ofSetLineWidth(5);
 		for (auto i : path) {
-			if (i.parent != NULL) {
+			if (i->parent != NULL) {
 				ofPoint pt; ofPolyline line;
-				pt.set(i.location.x, i.location.y); line.addVertex(pt);
-				pt.set(i.parent->location.x, i.parent->location.y); line.addVertex(pt);
+				pt.set(i->location.x, i->location.y); line.addVertex(pt);
+				pt.set(i->parent->location.x, i->parent->location.y); line.addVertex(pt);
 				line.draw();
 			}
 		}

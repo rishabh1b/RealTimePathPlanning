@@ -28,8 +28,8 @@ const float inf = std::numeric_limits<float>::infinity();
 #define goalx 250
 #define goaly 200
 #define converge 50.0
-#define epsilon 20
-#define rrtstarradius 25
+#define epsilon 50
+#define rrtstarradius 55
 #define allowedTimeRewiring 0.033
 #define maxNeighbours 50
 #define minDistClosestNode 5

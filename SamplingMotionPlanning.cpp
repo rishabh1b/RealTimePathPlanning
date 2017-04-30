@@ -261,9 +261,9 @@ void RTRRTstar::nextIter(std::list<Nodes> &nodes, const std::list<obstacles*>& o
 {
 	timeKeeper = ofGetElapsedTimef();
 	expandAndRewire(nodes, obst);
-	if (SMP::target != NULL)
+	if (SMP::goalFound)
 		updateNextBestPath();
-	if (currPath.size() > 1 && agent->getLocation().distance(SMP::root->location) < 0.5)
+	if (currPath.size() > 1 && agent->getLocation().distance(SMP::root->location) < 0.001)
 	{
 		Nodes* nextPoint = *(currPath.begin()++); //Change the DS for path to vector?
 		SMP::root->location.x = nextPoint->location.x;
@@ -271,8 +271,11 @@ void RTRRTstar::nextIter(std::list<Nodes> &nodes, const std::list<obstacles*>& o
 
 		currPath.clear();
 		currPath.push_back(SMP::root);
+		RTRRTstar::visited_set.clear();
+		pushedToRewireRoot.clear();
 	}
 	//SMP::moveNow = true; //might not be needed
+	closestNeighbours.clear();
 }
 
 void RTRRTstar::expandAndRewire(std::list<Nodes>& nodes, const std::list<obstacles*>& obst)
@@ -300,9 +303,9 @@ void RTRRTstar::expandAndRewire(std::list<Nodes>& nodes, const std::list<obstacl
 		{
 			this->rewireRand.push_front(v);
 		}
-		//rewireRandomNode(obst, nodes);
+		rewireRandomNode(obst, nodes);
 	}
-	//rewireFromRoot(obst, nodes);
+	rewireFromRoot(obst, nodes);
 }
 
 void RTRRTstar::updateNextBestPath()
@@ -419,15 +422,14 @@ void RTRRTstar::addNode(Nodes n, Nodes* closest, std::list<Nodes>& nodes, const 
 	nodes.push_back(n);
 	parent->children.push_back(&(nodes.back()));
 
-	if (SMP::target != NULL && n.location.distance(target->location) < converge)
+	if (n.location.distance(SMP::goal) < converge)
 	{
+		SMP::target = &(nodes.back());
 		SMP::goalFound = true;
 	}
 	//TODO: Add the node to the Grid based/KD-Tree Data structure
 
 	this->rewireRand.push_front(&(nodes.back()));
-
-	closestNeighbours.clear();
 }
 
 float RTRRTstar::cost(Nodes* node)
@@ -457,7 +459,7 @@ float RTRRTstar::cost(Nodes* node)
 
 void RTRRTstar::rewireRandomNode(const list<obstacles*> &obst, std::list<Nodes> &nodes)
 {
-	while (!rewireRand.empty())// && (ofGetElapsedTimef() - timeKeeper) < 0.5 * allowedTimeRewiring)
+	while (!rewireRand.empty() && (ofGetElapsedTimef() - timeKeeper) < 0.5 * allowedTimeRewiring)
 	{
 		Nodes* Xr = rewireRand.front();
 		rewireRand.pop_front();
@@ -501,7 +503,7 @@ void RTRRTstar::rewireFromRoot(const list<obstacles*> &obst, std::list<Nodes> &n
 		rewireRoot.push_back(SMP::root);
 	}
 
-	while (!rewireRoot.empty())// && (ofGetElapsedTimef() - timeKeeper) < allowedTimeRewiring) {
+	while (!rewireRoot.empty() && (ofGetElapsedTimef() - timeKeeper) < allowedTimeRewiring) 
 		{
 			Nodes* Xs = rewireRoot.front();
 			rewireRoot.pop_front();
