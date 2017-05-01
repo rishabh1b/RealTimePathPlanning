@@ -170,7 +170,7 @@ inline void Enviroment::targetSet(ofVec2f loc)
 
 inline void Enviroment::render()
 {
-	gui.draw();
+	//gui.draw();
 	ofEnableAlphaBlending();
 
 	ofSetColor({150, 0, 255});
