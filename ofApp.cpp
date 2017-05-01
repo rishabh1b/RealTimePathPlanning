@@ -37,10 +37,17 @@ void ofApp::setup() {
 	ob = wall;
 	obst.push_back(ob);
 
+	w.set(ofGetWidth() / 4, 0.3*ofGetHeight());
+	wall = new maze(w,60,0.4*ofGetHeight());
+	ob = wall;
+	obst.push_back(ob);
+	
+	w.set(0.75*ofGetWidth(), 0.3*ofGetHeight());
+	wall = new maze(w, 60, 0.4*ofGetHeight());
+	ob = wall;
+	obst.push_back(ob);
 
-
-
-	cout <<"obst size:" <<obst.size() << endl;
+	cout << "Obst size: " << obst.size() << endl;
 
 	std::cout << ofGetElapsedTimef();
 #ifdef randomSeed

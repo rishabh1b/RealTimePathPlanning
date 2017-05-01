@@ -8,6 +8,7 @@
 #include"RRTstar.h"
 #include"InformedRRTstar.h"
 #include"RT-RRTstar.h"
+#include"ofxGui.h"
 //--------------------------------------------------------------class
 class Enviroment
 {
@@ -32,6 +33,8 @@ public:
 	//--------------------------------------------------------------Variables
 	bool grid = false;
 	bool goalin = false;
+	ofxFloatSlider guiRad,guiEpsilon;
+	ofxPanel gui;
 private:
 	//--------------------------------------------------------------Variables
 protected:
@@ -65,6 +68,9 @@ inline void Enviroment::setup()
 
 inline void Enviroment::setup(ofVec2f _start)
 {
+	gui.setup();
+	gui.add(guiRad.setup("Radius", rrtstarradius, 10, 200));
+	gui.add(guiEpsilon.setup("Epsilon",epsilon , 5, 150));
 	home = _start;
 
 	Nodes start(home.x, home.y, 0);
@@ -155,6 +161,7 @@ inline void Enviroment::targetSet(ofVec2f loc)
 
 inline void Enviroment::render()
 {
+	gui.draw();
 	ofEnableAlphaBlending();
 
 	ofSetColor({150, 0, 255});

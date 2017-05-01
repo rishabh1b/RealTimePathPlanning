@@ -15,8 +15,12 @@ public:
 	virtual  bool isCircle() { return true; }
 	virtual bool isCollide(ofVec2f, ofVec2f);
 	virtual bool isInside(ofVec2f);
+	virtual void applyForce(ofVec2f force);
+	virtual void update();
+	virtual ofVec2f repulsive(obstacles *obst);
+	float mass;
 private:
-	ofVec2f location;
+	ofVec2f location,velocity,accelaration;
 	float radius;
 	ofColor color;
 };
@@ -37,8 +41,11 @@ public:
 	bool isCircle() { return true; }
 	bool isCollide(ofVec2f, ofVec2f);
 	bool isInside(ofVec2f);
+	void applyForce(ofVec2f force);
+	void update();
+	ofVec2f repulsive(obstacles *obst);
 private:
-	ofVec2f location;
+	ofVec2f location, accelaration;
 	float radius;
 	ofColor color;
 	float maxVal;
@@ -51,10 +58,11 @@ class maze:public obstacles
 {
 public:
 	maze(ofVec2f loc);
+	maze(ofVec2f loc, float width, float height);
 	~maze();
 	void render();
 	void move(std::list<obstacles*> obst);
-	ofVec2f getloc() { return this->location;}
+	ofVec2f loc();
 	bool isCircle() { return false; }
 	bool isCollide(ofVec2f p1, ofVec2f p2);
 	bool isInside(ofVec2f p);
