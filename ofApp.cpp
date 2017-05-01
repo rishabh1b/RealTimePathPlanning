@@ -14,17 +14,6 @@ void ofApp::setup() {
 	ofBackground(200,200,200,200);
 	//map = new Enviroment();
 	//car.setup();
-	for (unsigned int i = 0; i < numberOfobst; i++)
-	{
-		//obstacles *ob = new obstacles();
-		OBST = new movingObst();
-		obstacles *ob = OBST;
-		obst.push_back(ob);
-	}
-	//
-	//OBST = new movingObst();
-	//obstacles *ob = OBST;
-	//obst.push_back(ob);
 
 	ofVec2f w;
 	w.set(ofGetWidth() / 2, 0);
@@ -37,15 +26,27 @@ void ofApp::setup() {
 	ob = wall;
 	obst.push_back(ob);
 
-	w.set(ofGetWidth() / 4, 0.3*ofGetHeight());
-	wall = new maze(w,60,0.4*ofGetHeight());
+	w.set(ofGetWidth() / 4, 0.4*ofGetHeight());
+	wall = new maze(w, 60, 0.2*ofGetHeight());
 	ob = wall;
 	obst.push_back(ob);
-	
-	w.set(0.75*ofGetWidth(), 0.3*ofGetHeight());
-	wall = new maze(w, 60, 0.4*ofGetHeight());
+
+	w.set(0.75*ofGetWidth(), 0.4*ofGetHeight());
+	wall = new maze(w, 60, 0.2*ofGetHeight());
 	ob = wall;
 	obst.push_back(ob);
+
+	for (unsigned int i = 0; i < numberOfobst; i++)
+	{
+		//obstacles *ob = new obstacles();
+		OBST = new movingObst();
+		obstacles *ob = OBST;
+		obst.push_back(ob);
+	}
+	//
+	//OBST = new movingObst();
+	//obstacles *ob = OBST;
+	//obst.push_back(ob);
 
 	cout << "Obst size: " << obst.size() << endl;
 
