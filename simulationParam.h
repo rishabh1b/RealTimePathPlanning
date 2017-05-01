@@ -35,4 +35,4 @@ const float inf = std::numeric_limits<float>::infinity();
 #define minDistClosestNode 5
 #define alpha 0.1
 #define beta 1.4
-#define repulseConst 100000
+#define repulseConst 20

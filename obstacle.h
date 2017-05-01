@@ -43,7 +43,6 @@ private:
 	float radius;
 	ofColor color;
 	float maxVal;
-	float mass;
 #ifdef automatic
 	ofVec2f velocity;
 	ofVec2f acceleration;
@@ -61,6 +60,7 @@ public:
 	bool isCircle() { return false; }
 	bool isCollide(ofVec2f p1, ofVec2f p2);
 	bool isInside(ofVec2f p);
+	//float getParam(obstacles* p);
 private:
 	ofColor color;
 	ofVec2f location;

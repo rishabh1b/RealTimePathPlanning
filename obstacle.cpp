@@ -123,20 +123,40 @@ void movingObst::move(std::list <obstacles *> obst)
 {
 	ofVec2f acceleration;
 	acceleration.set(0,0);
-	for (auto i : obst) {
-		acceleration += repulse(*i);
-	}
-	velocity = velocity + acceleration;
-	if (velocity.length() > maxVal) {
-		velocity.x = maxVal;
-		velocity.y = maxVal;
-	}
+	//if (isCircle()) {
+		for (auto i : obst) {
+			acceleration += repulse(*i);
+		}
+	//}
+
+	velocity -= acceleration;
+
 	if (location.y + radius >= ofGetHeight() || location.y - radius <= 0) {
 		velocity.y = velocity.y*-1;
 	}
 	if (location.x - radius <= 0 || location.x + radius >= ofGetWidth()) {
 		velocity.x = velocity.x*-1;
 	}
+
+	//if (acceleration.length() > mForce) {
+	//	acceleration.normalized();
+	//	acceleration *= mForce;
+	//}
+	//else if (acceleration.length() < mForce) {
+	//	acceleration.normalized();
+	//	acceleration *= mForce;
+	//}
+	
+
+	if (velocity.length() > maxVal || velocity.length() < maxVal) {
+		velocity.normalize();
+		velocity *= maxVal;
+	}
+	//else if (acceleration.length() < mForce) {
+	//	acceleration.normalized();
+	//	acceleration *= mForce;
+	//}
+
 	location += velocity;
 
 }
@@ -171,10 +191,13 @@ bool movingObst::isInside(ofVec2f n)
 }
 ofVec2f movingObst::repulse(obstacles obst)
 {
-	ofVec2f acceleration = location - obst.loc();
+	//ofVec2f temp = obst.loc();
+	//temp.set(temp.x+)
+	ofVec2f acceleration = obst.loc() - location;
 	float dist = acceleration.length();
 	float strength = repulseConst / (dist*dist);
-	acceleration = acceleration*strength;
+	acceleration.normalized();
+	acceleration *= strength;
 	return acceleration;
 }
 maze::maze(ofVec2f loc)
@@ -217,3 +240,8 @@ bool maze::isInside(ofVec2f p)
 {
 	return rect.inside(p);
 }
+
+//float maze::getParam(obstacles* p)
+//{
+//	return p->width, p->height;
+//}
