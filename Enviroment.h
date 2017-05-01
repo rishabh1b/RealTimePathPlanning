@@ -111,8 +111,9 @@ inline void Enviroment::update(Robot *car,list<obstacles*> obst)
 	}
 	
 	//Following is Informed RRT-star stuff
-	/*if (SMP::sampledInGoalRegion)
-	SMP::sampledInGoalRegion = false;
+	/*
+	if (SMP::sampledInGoalRegion)
+		SMP::sampledInGoalRegion = false;
 
 	if (SMP::target != NULL && !SMP::moveNow && InformedRRTstar::usingInformedRRTstar)
 	{
@@ -120,21 +121,20 @@ inline void Enviroment::update(Robot *car,list<obstacles*> obst)
 		Nodes *pathNode = SMP::target;
 		do
 		{
-			path.push_back(*pathNode);
+			path.push_back(pathNode);
 			pathNode = pathNode->parent;
 		} while (pathNode->parent != NULL);
 		//planner = !planner;
 		path.reverse();
-	}*/
-	/*
+	}
 	if (SMP::moveNow && InformedRRTstar::usingInformedRRTstar) {
-		std::list<Nodes>::iterator pathIt = path.begin();
+		std::list<Nodes*>::iterator pathIt = path.begin();
 
 		while(pathIt !=path.end()){
-			if (pathIt->alive) {
-				car->controller(pathIt->location);
-				float dist= pathIt->location.distance(car->getLocation());
-				if (dist < 2.0) pathIt->alive = false;
+			if ((*pathIt)->alive) {
+				car->controller((*pathIt)->location);
+				float dist= (*pathIt)->location.distance(car->getLocation());
+				if (dist < 2.0) (*pathIt)->alive = false;
 				break;
 			}
 			pathIt++;

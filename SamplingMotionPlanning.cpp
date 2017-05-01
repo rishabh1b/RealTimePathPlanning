@@ -232,7 +232,7 @@ Nodes InformedRRTstar::sample(float c_max)
 
 
 	if (std::abs(c_max - c_min) < 100 && usingInformedRRTstar) //Putting a dummy value for now - Robot might not move for some configurations with this value
-	SMP::moveNow = true; //TODO: The flag will be associated with time. Should turn on when the spcified time lapses
+		SMP::moveNow = true; //TODO: The flag will be associated with time. Should turn on when the spcified time lapses
 
 	ofVec2f x_centre = (SMP::start + SMP::goal) / 2;
 	ofVec2f dir = SMP::goal - SMP::start;
