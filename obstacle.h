@@ -6,7 +6,12 @@ public:
 	obstacles();
 	obstacles(ofVec2f loc);
 	~obstacles();
+#ifdef automatic
 	virtual void move(std::list<obstacles*> obst);
+	virtual void applyForce(ofVec2f force);
+	virtual void update();
+	virtual ofVec2f repulsive(obstacles *obst);
+#endif // automatic
 	virtual void render();
 	virtual ofVec2f loc(){ return location; }
 	virtual float rad() { return radius; }
@@ -15,9 +20,6 @@ public:
 	virtual  bool isCircle() { return true; }
 	virtual bool isCollide(ofVec2f, ofVec2f);
 	virtual bool isInside(ofVec2f);
-	virtual void applyForce(ofVec2f force);
-	virtual void update();
-	virtual ofVec2f repulsive(obstacles *obst);
 	float mass;
 private:
 	ofVec2f location,velocity,accelaration;
@@ -61,7 +63,9 @@ public:
 	maze(ofVec2f loc, float width, float height);
 	~maze();
 	void render();
+#ifdef automatic
 	void move(std::list<obstacles*> obst);
+#endif 
 	ofVec2f loc();
 	bool isCircle() { return false; }
 	bool isCollide(ofVec2f p1, ofVec2f p2);

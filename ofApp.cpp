@@ -38,19 +38,18 @@ void ofApp::setup() {
 
 	for (unsigned int i = 0; i < numberOfobst; i++)
 	{
-		//obstacles *ob = new obstacles();
-		OBST = new movingObst();
-		obstacles *ob = OBST;
+		obstacles *ob = new obstacles();
+		//OBST = new movingObst();
+		//obstacles *ob = OBST;
 		obst.push_back(ob);
 	}
 	//
-	//OBST = new movingObst();
-	//obstacles *ob = OBST;
-	//obst.push_back(ob);
+	OBST = new movingObst();
+	ob = OBST;
+	obst.push_back(ob);
 
 	cout << "Obst size: " << obst.size() << endl;
 
-	std::cout << ofGetElapsedTimef();
 #ifdef randomSeed
 	std::cout << "RandomSeed:" << randomSeed << endl;
 #endif

@@ -21,7 +21,7 @@ obstacles::obstacles(ofVec2f loc)
 obstacles::~obstacles()
 {
 }
-
+#ifdef automatic
 void obstacles::move(std::list<obstacles*> obst)
 {
 	for (auto i : obst)
@@ -30,8 +30,7 @@ void obstacles::move(std::list<obstacles*> obst)
 	}
 	this->update();
 }
-
-
+#endif
 void obstacles::render()
 {
 	//move();
@@ -72,7 +71,7 @@ bool obstacles::isInside(ofVec2f n)
 {
 	return (n.distance(location) <= radius);
 }
-
+#ifdef automatic
 void obstacles::applyForce(ofVec2f force)
 {
 	accelaration += force/mass;
@@ -98,7 +97,7 @@ ofVec2f obstacles::repulsive(obstacles *obst)
 	force.rescale(strength);
 	return force;
 }
-
+#endif
 movingObst::movingObst()
 {
 	float x = ofRandom(0, ofGetWindowWidth());
@@ -108,7 +107,7 @@ movingObst::movingObst()
 #ifdef automatic
 	velocity.set(maxVal*ofRandom(-1,1), maxVal*ofRandom(-1, 1));
 #endif // automatic
-	radius = ofRandom(10, 20);
+	radius = 25;
 	mass = 3.14*radius*radius;
 	color = { 200,100,20 };
 }
@@ -200,11 +199,11 @@ bool movingObst::isInside(ofVec2f n)
 {
 	return (n.distance(location) <= radius);
 }
+#ifdef automatic
 void movingObst::applyForce(ofVec2f force)
 {
 	accelaration += force / mass;
 }
-
 void movingObst::update()
 {
 	velocity += accelaration;
@@ -225,7 +224,7 @@ ofVec2f movingObst::repulsive(obstacles *obst)
 	force.rescale(strength);
 	return force;
 }
-
+#endif
 maze::maze(ofVec2f loc)
 {
 	location = loc;
@@ -262,12 +261,12 @@ void maze::render()
 	ofNoFill();
 	ofDisableAlphaBlending();
 }
-
+#ifdef automatic
 void maze::move(std::list<obstacles*> obst)
 {
 
 }
-
+#endif
 ofVec2f maze::loc()
 {
 	ofVec2f temp;
