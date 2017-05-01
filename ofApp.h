@@ -22,10 +22,13 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 	private:
+		ofTrueTypeFont myfont;
 		bool updateFlag = true;
 		Enviroment *map;
 		Robot *car;
 		std::list<obstacles*> obst;
 		movingObst *OBST;
 		maze *wall;
+
+		double updateTime = 0, drawTime = 0;
 };

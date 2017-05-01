@@ -28,7 +28,7 @@ public:
 	void update(Robot *car);
 	// Render method draw nodes in enviroment.
 	void render();
-
+	float numofnode() { return nodes.size(); };
 	void renderGrid();
 	//--------------------------------------------------------------Variables
 	bool grid = false;
