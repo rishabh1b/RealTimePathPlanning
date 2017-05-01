@@ -12,6 +12,7 @@ void ofApp::setup() {
 	ofSetFrameRate(30);
 	ofSetWindowTitle("Dynamic-obstacles");
 	ofBackground(200,200,200,200);
+	myfont.loadFont("Roboto-Regular.ttf", 10);
 	//map = new Enviroment();
 	//car.setup();
 
@@ -66,8 +67,8 @@ void ofApp::update(){
 #ifdef CLK
 	auto start = std::chrono::steady_clock::now();
 #endif // DEBUG
-#ifdef automatic
 
+#ifdef automatic
 	for (auto i : obst) {
 		i->move(obst);
 		//cout << "location: " << i->loc() << "Radius: " << i->rad() << endl;
@@ -78,7 +79,8 @@ void ofApp::update(){
 	if (map!= NULL) map->update(car,obst);
 #ifdef CLK
 	auto end = std::chrono::steady_clock::now();
-	std::cout << std::endl << "Update:" << std::chrono::duration<double, std::milli>(end - start).count() << " ms" << std::endl;
+	/*std::cout << std::endl << "Update:" << std::chrono::duration<double, std::milli>(end - start).count() << " ms" << std::endl;*/
+	updateTime = std::chrono::duration<double, std::milli>(end - start).count();
 #endif // DEBUG
 }
 
@@ -94,9 +96,27 @@ void ofApp::draw(){
 	if (map != NULL) map->render();
 	if (car!= NULL) car->render();
 
+	char fpsStr[255]; // an array of chars
+	ofSetColor({ 255,0,0 });
+	sprintf(fpsStr, "Frame rate: %d", int(ofGetFrameRate()));
+	myfont.drawString(fpsStr, ofGetWindowWidth() - 100, ofGetWindowHeight() - 25);
+	if (map != NULL) {
+		char numNode[255];
+		sprintf(numNode, "Number of nodes: %d", int(map->numofnode()));
+		myfont.drawString(numNode, ofGetWindowWidth() - 140, ofGetWindowHeight() - 10);
+	}
+
 #ifdef CLK
 	auto end = std::chrono::steady_clock::now();
-	std::cout << std::endl << "Draw:" << std::chrono::duration<double, std::milli>(end - start).count() << " ms" << std::endl;
+	/*std::cout << std::endl << "Draw:" << std::chrono::duration<double, std::milli>(end - start).count() << " ms" << std::endl;*/
+	drawTime = std::chrono::duration<double, std::milli>(end - start).count();
+
+	char time[255];
+	sprintf(time, "Update rate: %f", updateTime);
+	myfont.drawString(time, ofGetWindowWidth() - 140, ofGetWindowHeight() - 755);
+	sprintf(time, "Draw rate: %f", drawTime);
+	myfont.drawString(time, ofGetWindowWidth() - 140, ofGetWindowHeight() - 740);
+
 #endif // DEBUG
 }
 
