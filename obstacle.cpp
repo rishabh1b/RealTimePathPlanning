@@ -20,7 +20,7 @@ obstacles::~obstacles()
 {
 }
 
-void obstacles::move()  
+void obstacles::move(std::list <obstacles *> obst)
 {
 	//float stepsize = ofRandom(0, 10);
 	//float stepx = ofRandom(-stepsize, stepsize);
@@ -119,16 +119,26 @@ void movingObst::move(char key)
 }
 #endif // 
 #ifdef automatic
-void movingObst::move()
+void movingObst::move(std::list <obstacles *> obst)
 {
-	if (location.y+radius >= ofGetHeight() || location.y- radius <= 0) {
+	ofVec2f acceleration;
+	acceleration.set(0,0);
+	for (auto i : obst) {
+		acceleration += repulse(*i);
+	}
+	velocity = velocity + acceleration;
+	if (velocity.length() > maxVal) {
+		velocity.x = maxVal;
+		velocity.y = maxVal;
+	}
+	if (location.y + radius >= ofGetHeight() || location.y - radius <= 0) {
 		velocity.y = velocity.y*-1;
 	}
-	if (location.x- radius <= 0 || location.x+ radius >= ofGetWidth()) {
+	if (location.x - radius <= 0 || location.x + radius >= ofGetWidth()) {
 		velocity.x = velocity.x*-1;
 	}
-
 	location += velocity;
+
 }
 #endif // automatic
 bool movingObst::isCollide(ofVec2f n1, ofVec2f n2)
@@ -159,6 +169,14 @@ bool movingObst::isInside(ofVec2f n)
 {
 	return (n.distance(location) <= radius);
 }
+ofVec2f movingObst::repulse(obstacles obst)
+{
+	ofVec2f acceleration = location - obst.loc();
+	float dist = acceleration.length();
+	float strength = repulseConst / (dist*dist);
+	acceleration = acceleration*strength;
+	return acceleration;
+}
 maze::maze(ofVec2f loc)
 {
 	location = loc;
@@ -185,7 +203,7 @@ void maze::render()
 	ofDisableAlphaBlending();
 }
 
-void maze::move()
+void maze::move(std::list <obstacles *> obst)
 {
 
 }
